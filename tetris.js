@@ -62,5 +62,30 @@ function clearScreen() {
 }
 
 function drawGameGrid() {
-    
+    DrawService.setStrokeColor('lightgray');
+    const numberOfRows = DrawService.getCanvasHeight() / GameConfig.cellSquareSize;
+    const numberOfColumns = DrawService.getCanvasWidth() / GameConfig.cellSquareSize;
+    let heightInterval = GameConfig.cellSquareSize;
+    let widthInterval = GameConfig.cellSquareSize;
+    // Draw row grid lines
+    for (let rowIndex = 0; rowIndex < numberOfRows; rowIndex++) {
+        DrawService.drawLine(
+            DrawService.getMinHorizontalPosition(), // xStart
+            heightInterval, // yStart
+            DrawService.getMaxHorizontalPosition(), // xEnd
+            heightInterval // yEnd
+        );
+        heightInterval += GameConfig.cellSquareSize;
+    }
+
+    // Draw Column grid lines
+    for (let columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
+        DrawService.drawLine(
+            widthInterval, // xStart
+            DrawService.getMinVerticalPosition(), // yStart
+            widthInterval, // xEnd
+            DrawService.getMaxVerticalPosition() // yEnd
+        );
+        widthInterval += GameConfig.cellSquareSize;
+    }
 }
