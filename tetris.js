@@ -23,12 +23,13 @@ import * as GameConfig from './config/game-config.js';
  * ===============================================================
  **/
 
-DrawService.setupCanvas();
 
 document.querySelector('#dark-mode-checkbox')
     .addEventListener('click', toggleDarkMode)
 
-drawGameGrid();
+// setupCanvas();
+initPlayScreen();
+
 
 
 
@@ -41,6 +42,11 @@ drawGameGrid();
  * ===============================================================
  **/
 
+function setupCanvas() {
+    DrawService.setupCanvas(GameConfig.canvasHeight, GameConfig.canvasWidth, GameConfig.getIsDarkMode());
+    initPlayScreen();
+}
+
 function toggleDarkMode(clickEvent) {
     if (clickEvent.target.checked) {
         GameConfig.setIsDarkMode(true);
@@ -51,10 +57,10 @@ function toggleDarkMode(clickEvent) {
 }
 
 function initPlayScreen() {
-    DrawService.setupCanvas();
     // const screenState = new ScreenState(player, score, food)
     // console.log('screenState', screenState);
-    clearScreen();
+    // clearScreen();
+    drawGameGrid();
 }
 
 function clearScreen() {
@@ -62,12 +68,14 @@ function clearScreen() {
 }
 
 function drawGameGrid() {
-    DrawService.setStrokeColor('lightgray');
+    // DrawService.setStrokeColor(GameConfig.getIsDarkMode() ? 'lightgray' : 'green');
+    DrawService.setupCanvas(GameConfig.canvasHeight, GameConfig.canvasWidth, GameConfig.getIsDarkMode());
+    clearScreen();
     const numberOfRows = DrawService.getCanvasHeight() / GameConfig.cellSquareSize;
     const numberOfColumns = DrawService.getCanvasWidth() / GameConfig.cellSquareSize;
     let heightInterval = GameConfig.cellSquareSize;
     let widthInterval = GameConfig.cellSquareSize;
-    // Draw row grid lines
+    // Draw horizontal grid lines
     for (let rowIndex = 0; rowIndex < numberOfRows; rowIndex++) {
         DrawService.drawLine(
             DrawService.getMinHorizontalPosition(), // xStart
@@ -78,7 +86,7 @@ function drawGameGrid() {
         heightInterval += GameConfig.cellSquareSize;
     }
 
-    // Draw Column grid lines
+    // Draw verttical grid lines
     for (let columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
         DrawService.drawLine(
             widthInterval, // xStart
@@ -88,4 +96,7 @@ function drawGameGrid() {
         );
         widthInterval += GameConfig.cellSquareSize;
     }
+
+
+    // DrawService.drawGrid();
 }
