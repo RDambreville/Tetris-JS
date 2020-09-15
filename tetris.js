@@ -1,12 +1,12 @@
 import * as DrawService from '../draw.js';
 import * as GameConfig from './config/game-config.js';
+import { GameGrid } from './models/game-grid.js'
 
 /**===============================================================
  * ====================== Variables ==============================
  * ===============================================================
  **/
-
-
+let gameGrid = new GameGrid();
 
 
 
@@ -28,7 +28,12 @@ document.querySelector('#dark-mode-checkbox')
     .addEventListener('click', toggleDarkMode)
 
 // setupCanvas();
-initPlayScreen();
+// initPlayScreen();
+
+setInterval(runDrawLoop, 900); // Don't use parentheses with the method call
+
+// gameGrid.drawRandomTetrimino();
+// drawGameGrid();
 
 
 
@@ -41,6 +46,13 @@ initPlayScreen();
  * ====================== Method Definitions ======================
  * ===============================================================
  **/
+
+
+function runDrawLoop() {
+    DrawService.clearCanvas();
+    gameGrid.drawRandomTetrimino();
+    drawGameGrid();
+}
 
 function setupCanvas() {
     DrawService.setupCanvas(GameConfig.canvasHeight, GameConfig.canvasWidth, GameConfig.getIsDarkMode());
@@ -69,10 +81,12 @@ function clearScreen() {
 
 function drawGameGrid() {
     // DrawService.setStrokeColor(GameConfig.getIsDarkMode() ? 'lightgray' : 'green');
-    DrawService.setupCanvas(GameConfig.canvasHeight, GameConfig.canvasWidth, GameConfig.getIsDarkMode());
-    clearScreen();
-    const numberOfRows = DrawService.getCanvasHeight() / GameConfig.cellSquareSize;
-    const numberOfColumns = DrawService.getCanvasWidth() / GameConfig.cellSquareSize;
+    // DrawService.setupCanvas(GameConfig.canvasHeight, GameConfig.canvasWidth, GameConfig.getIsDarkMode());
+    // clearScreen();
+    const numberOfRows = 
+        Math.floor(DrawService.getCanvasHeight() / GameConfig.cellSquareSize);
+    const numberOfColumns = 
+        Math.floor(DrawService.getCanvasWidth() / GameConfig.cellSquareSize);
     let heightInterval = GameConfig.cellSquareSize;
     let widthInterval = GameConfig.cellSquareSize;
     // Draw horizontal grid lines
