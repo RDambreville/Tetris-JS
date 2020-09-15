@@ -26,6 +26,6 @@ export function setIsDarkMode(_isDarkMode) {
     isDarkMode = _isDarkMode
 }
 
-export let canvasHeight = '100%';
+export let canvasHeight = window.innerHeight;
 
-export let canvasWidth = '50%';
+export let canvasWidth = window.innerWidth / 2;
