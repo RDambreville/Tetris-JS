@@ -7,7 +7,7 @@ import { GameGrid } from './models/game-grid.js'
  * ===============================================================
  **/
 let gameGrid = new GameGrid();
-
+let shapeIndex = 0;
 
 
 
@@ -49,9 +49,14 @@ setInterval(runDrawLoop, 900); // Don't use parentheses with the method call
 
 
 function runDrawLoop() {
+    if (shapeIndex === 7) {
+        shapeIndex = 0;
+    }
     DrawService.clearCanvas();
-    gameGrid.drawRandomTetrimino();
+    gameGrid.clearGrid();
+    gameGrid.drawRandomTetrimino(shapeIndex);
     drawGameGrid();
+    shapeIndex++;
 }
 
 function setupCanvas() {
@@ -79,6 +84,7 @@ function clearScreen() {
     DrawService.clearCanvas();
 }
 
+// TODO: Move to gameGrid class and rename to drawGridLines()
 function drawGameGrid() {
     // DrawService.setStrokeColor(GameConfig.getIsDarkMode() ? 'lightgray' : 'green');
     // DrawService.setupCanvas(GameConfig.canvasHeight, GameConfig.canvasWidth, GameConfig.getIsDarkMode());
