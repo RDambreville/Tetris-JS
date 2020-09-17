@@ -6,4 +6,12 @@ export class Tetrimino {
     constructor(shapeIndex) {
         this.shapeArray = TetriminoShapeStore[shapeIndex];
     }
+
+    rotate(direction) {
+
+    }
+
+    translate(direction) {
+        
+    }
 }
