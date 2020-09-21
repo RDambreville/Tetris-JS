@@ -8,17 +8,18 @@ export class GameGrid {
     grid = [];
     numberOfRows;
     numberOfColumns;
-    currentTetriminoToDraw;
+    currentTetrimino;
+
     constructor() {
         DrawService.setupCanvas(GameConfig.canvasHeight, GameConfig.canvasWidth, GameConfig.getIsDarkMode());
         DrawService.clearCanvas();
-        this.numberOfRows = Math.ceil(DrawService.getCanvasHeight() / GameConfig.cellSquareSize);
-        this.numberOfColumns = Math.ceil(DrawService.getCanvasWidth() / GameConfig.cellSquareSize);
-        this.clearGrid();
+        this.numberOfRows = Math.floor(DrawService.getCanvasHeight() / GameConfig.cellSquareSize);
+        this.numberOfColumns = Math.floor(DrawService.getCanvasWidth() / GameConfig.cellSquareSize);
+        this.clearGridData();
         console.log('empty grid', this.grid);
     }
 
-    clearGrid() {
+    clearGridData() {
         this.grid = [];
         for (let rowIndex = 0; rowIndex < this.numberOfRows; rowIndex++) {
             this.grid.push([]);
@@ -28,29 +29,32 @@ export class GameGrid {
         }
     }
 
-    drawRandomTetrimino(shapeIndex) {
+    createNewTetrimino(shapeIndex) {
         // const randomShapeIndex = Math.ceil(Math.random() * (6 - 0));
         const randomShapeIndex = shapeIndex;
-        this.currentTetriminoToDraw = new Tetrimino(randomShapeIndex);
-        console.log('new tetrimino', this.currentTetriminoToDraw);
-        this.updateGrid();
+        this.currentTetrimino = new Tetrimino(randomShapeIndex);
+        console.log('new tetrimino', this.currentTetrimino);
+    }
+
+    drawTetrimino() {
+        this.updateGridData();
         this.drawGrid();
     }
 
-    updateGrid() {
+    updateGridData() {
         // const middleRowIndex = Math.floor(this.grid.length / 2);
         // const middleColumnIndex = Math.floor(this.grid[0].length / 2);
-        const numberOfRows = this.currentTetriminoToDraw.shapeArray.length;
-        for (let rowIndex = numberOfRows -1; rowIndex >= 0; rowIndex--) {
+        const numberOfRows = this.currentTetrimino.shapeArray.length;
+        for (let rowIndex = numberOfRows - 1; rowIndex >= 0; rowIndex--) {
             // const horizShapeCenter = Math.ceil(row.length / 2);
-            const numberOfColumns = this.currentTetriminoToDraw.shapeArray[rowIndex].length;
+            const numberOfColumns = this.currentTetrimino.shapeArray[rowIndex].length;
             for (let columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
                 // this.grid[middleRowIndex + rowIndex][middleColumnIndex + columnIndex] = columnValue;
                 this.grid[5 - rowIndex][5 + columnIndex] =
-                    this.currentTetriminoToDraw.shapeArray[rowIndex][columnIndex];
+                    this.currentTetrimino.shapeArray[rowIndex][columnIndex];
             }
         };
-        console.log('grid after draw', this.grid);
+        console.log('grid after update', this.grid);
     }
 
     drawGrid() {
@@ -59,10 +63,10 @@ export class GameGrid {
         let horizontalOffset = 5 * GameConfig.cellSquareSize;
         let verticalOffset = this.numberOfRows * GameConfig.cellSquareSize;
 
-        // Draw from the bottom of the grid and move upwards
-        for (let rowIndex = this.numberOfRows - 1; rowIndex >= 0 ; rowIndex--) {
-           for (let columnIndex = 0; columnIndex < this.numberOfColumns; columnIndex++) {
-               const columnValue = this.grid[rowIndex][columnIndex];
+        // Draw from the bottom up
+        for (let rowIndex = this.numberOfRows - 1; rowIndex >= 0; rowIndex--) {
+            for (let columnIndex = 0; columnIndex < this.numberOfColumns; columnIndex++) {
+                const columnValue = this.grid[rowIndex][columnIndex];
                 if (columnValue) {
                     DrawService.drawRectangle(
                         /*columnIndex +*/ horizontalOffset,
@@ -71,13 +75,62 @@ export class GameGrid {
                         GameConfig.cellSquareSize
                     );
                 }
-                // Move the "paintbrush" forward to the right by 1 column
+                // Move the "paintbrush" forward to the right by however
+                // many columns it takes to find a filled square
                 horizontalOffset = this.grid[rowIndex][columnIndex + 1] ? (columnIndex + 1) * GameConfig.cellSquareSize : initialHorizontalOffset;
             }
-            // Move the "paintbrush" upwards by 1 row;
-            verticalOffset -= GameConfig.cellSquareSize;
+
+            verticalOffset -= GameConfig.cellSquareSize; // Move the "paintbrush" upwards by 1 row;
             horizontalOffset = initialHorizontalOffset; // move the "paintbrush" back to the beginning of the line like a carriage return
         };
+        this.drawGridLines();
+    }
+
+    drawGridLines() {
+        // DrawService.setStrokeColor(GameConfig.getIsDarkMode() ? 'lightgray' : 'green');
+        // DrawService.setupCanvas(GameConfig.canvasHeight, GameConfig.canvasWidth, GameConfig.getIsDarkMode());
+        // clearScreen();
+        const numberOfRows =
+            Math.floor(DrawService.getCanvasHeight() / GameConfig.cellSquareSize);
+        const numberOfColumns =
+            Math.floor(DrawService.getCanvasWidth() / GameConfig.cellSquareSize);
+        let heightInterval = GameConfig.cellSquareSize;
+        let widthInterval = GameConfig.cellSquareSize;
+        // Draw horizontal grid lines
+        for (let rowIndex = 0; rowIndex < numberOfRows; rowIndex++) {
+            DrawService.drawLine(
+                DrawService.getMinHorizontalPosition(), // xStart
+                heightInterval, // yStart
+                DrawService.getMaxHorizontalPosition(), // xEnd
+                heightInterval // yEnd
+            );
+            heightInterval += GameConfig.cellSquareSize;
+        }
+
+        // Draw verttical grid lines
+        for (let columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
+            DrawService.drawLine(
+                widthInterval, // xStart
+                DrawService.getMinVerticalPosition(), // yStart
+                widthInterval, // xEnd
+                DrawService.getMaxVerticalPosition() // yEnd
+            );
+            widthInterval += GameConfig.cellSquareSize;
+        }
+
+
+        // DrawService.drawGrid();
+    }
+
+    handleMovement(userInput) {
+        switch (userInput) {
+            case 'up': this.currentTetrimino.rotate(); break;
+            case 'down': break;
+            case 'left': break;
+            case 'right': break;
+            case 'space': break;
+            default: return null;
+        }
     }
 
 }

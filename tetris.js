@@ -25,15 +25,19 @@ let shapeIndex = 0;
 
 
 document.querySelector('#dark-mode-checkbox')
-    .addEventListener('click', toggleDarkMode)
+    .addEventListener('click', toggleDarkMode);
+
+document.querySelector('body')
+    .addEventListener('keyup', handleMovement);
 
 // setupCanvas();
 // initPlayScreen();
 
-setInterval(runDrawLoop, 900); // Don't use parentheses with the method call
+// setInterval(drawTetrimino, 900); // Don't use parentheses with the method call
 
-// gameGrid.drawRandomTetrimino();
-// drawGameGrid();
+gameGrid.createNewTetrimino(5);
+gameGrid.drawTetrimino();
+
 
 
 
@@ -48,15 +52,43 @@ setInterval(runDrawLoop, 900); // Don't use parentheses with the method call
  **/
 
 
-function runDrawLoop() {
+// function drawTetrimino(shapeIndex) {
+//     // if (shapeIndex === 7) {
+//     //     shapeIndex = 0;
+//     // }
+//     DrawService.clearCanvas();
+//     gameGrid.clearGridData();
+//     gameGrid.drawTetrimino+(shapeIndex);
+//     drawGridLines();
+//     shapeIndex++;
+// }
+
+
+function drawTetrimino() {
     if (shapeIndex === 7) {
         shapeIndex = 0;
     }
     DrawService.clearCanvas();
-    gameGrid.clearGrid();
-    gameGrid.drawRandomTetrimino(shapeIndex);
-    drawGameGrid();
+    gameGrid.clearGridData();
+    gameGrid.drawTetrimino+(shapeIndex);
+    drawGridLines();
     shapeIndex++;
+}
+
+function handleMovement(event) {
+    console.log('keyPress event', event);
+    switch (event.key) {
+        case 'w': gameGrid.handleMovement('up'); break;
+        case 'ArrowUp': gameGrid.handleMovement('up'); break;
+        case 's': gameGrid.handleMovement('down'); break;
+        case 'ArrowDown': gameGrid.handleMovement('down'); break;
+        case 'a': gameGrid.handleMovement('left'); break;
+        case 'ArrowLeft': gameGrid.handleMovement('left'); break;
+        case 'd': gameGrid.handleMovement('right'); break;
+        case 'ArrowRight': gameGrid.handleMovement('right'); break;
+        case ' ': gameGrid.handleMovement();
+        default: gameGrid.handleMovement(null); // keep the direction the same
+    }
 }
 
 function setupCanvas() {
@@ -77,46 +109,9 @@ function initPlayScreen() {
     // const screenState = new ScreenState(player, score, food)
     // console.log('screenState', screenState);
     // clearScreen();
-    drawGameGrid();
+    drawGridLines();
 }
 
 function clearScreen() {
     DrawService.clearCanvas();
-}
-
-// TODO: Move to gameGrid class and rename to drawGridLines()
-function drawGameGrid() {
-    // DrawService.setStrokeColor(GameConfig.getIsDarkMode() ? 'lightgray' : 'green');
-    // DrawService.setupCanvas(GameConfig.canvasHeight, GameConfig.canvasWidth, GameConfig.getIsDarkMode());
-    // clearScreen();
-    const numberOfRows = 
-        Math.floor(DrawService.getCanvasHeight() / GameConfig.cellSquareSize);
-    const numberOfColumns = 
-        Math.floor(DrawService.getCanvasWidth() / GameConfig.cellSquareSize);
-    let heightInterval = GameConfig.cellSquareSize;
-    let widthInterval = GameConfig.cellSquareSize;
-    // Draw horizontal grid lines
-    for (let rowIndex = 0; rowIndex < numberOfRows; rowIndex++) {
-        DrawService.drawLine(
-            DrawService.getMinHorizontalPosition(), // xStart
-            heightInterval, // yStart
-            DrawService.getMaxHorizontalPosition(), // xEnd
-            heightInterval // yEnd
-        );
-        heightInterval += GameConfig.cellSquareSize;
-    }
-
-    // Draw verttical grid lines
-    for (let columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
-        DrawService.drawLine(
-            widthInterval, // xStart
-            DrawService.getMinVerticalPosition(), // yStart
-            widthInterval, // xEnd
-            DrawService.getMaxVerticalPosition() // yEnd
-        );
-        widthInterval += GameConfig.cellSquareSize;
-    }
-
-
-    // DrawService.drawGrid();
 }
