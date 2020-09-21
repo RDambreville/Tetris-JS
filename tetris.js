@@ -11,13 +11,6 @@ let shapeIndex = 0;
 
 
 
-
-
-
-
-
-
-
  /**===============================================================
  * ====================== Method Calls ============================
  * ===============================================================
@@ -30,19 +23,11 @@ document.querySelector('#dark-mode-checkbox')
 document.querySelector('body')
     .addEventListener('keyup', handleMovement);
 
-// setupCanvas();
-// initPlayScreen();
-
+// TODO: Remove
 // setInterval(drawTetrimino, 900); // Don't use parentheses with the method call
 
-gameGrid.createNewTetrimino(5);
+gameGrid.createNewTetrimino(0);
 gameGrid.drawTetrimino();
-
-
-
-
-
-
 
 
 
@@ -52,6 +37,8 @@ gameGrid.drawTetrimino();
  **/
 
 
+
+ // TODO: Remove
 // function drawTetrimino(shapeIndex) {
 //     // if (shapeIndex === 7) {
 //     //     shapeIndex = 0;
@@ -64,16 +51,17 @@ gameGrid.drawTetrimino();
 // }
 
 
-function drawTetrimino() {
-    if (shapeIndex === 7) {
-        shapeIndex = 0;
-    }
-    DrawService.clearCanvas();
-    gameGrid.clearGridData();
-    gameGrid.drawTetrimino+(shapeIndex);
-    drawGridLines();
-    shapeIndex++;
-}
+// TODO: Remove
+// function drawTetrimino() {
+//     if (shapeIndex === 7) {
+//         shapeIndex = 0;
+//     }
+//     DrawService.clearCanvas();
+//     gameGrid.clearGridData();
+//     gameGrid.drawTetrimino+(shapeIndex);
+//     drawGridLines();
+//     shapeIndex++;
+// }
 
 function handleMovement(event) {
     console.log('keyPress event', event);
@@ -106,12 +94,12 @@ function toggleDarkMode(clickEvent) {
 }
 
 function initPlayScreen() {
-    // const screenState = new ScreenState(player, score, food)
-    // console.log('screenState', screenState);
+    // TODO: Remove
     // clearScreen();
-    drawGridLines();
+    // drawGridLines();
 }
 
-function clearScreen() {
-    DrawService.clearCanvas();
-}
+// TODO: Move all drawing references to game-grid.js
+// function clearScreen() {
+//     DrawService.clearCanvas();
+// }

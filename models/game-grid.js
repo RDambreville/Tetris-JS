@@ -44,14 +44,14 @@ export class GameGrid {
     updateGridData() {
         // const middleRowIndex = Math.floor(this.grid.length / 2);
         // const middleColumnIndex = Math.floor(this.grid[0].length / 2);
-        const numberOfRows = this.currentTetrimino.shapeArray.length;
+        const numberOfRows = this.currentTetrimino.shapeMatrix.length;
         for (let rowIndex = numberOfRows - 1; rowIndex >= 0; rowIndex--) {
             // const horizShapeCenter = Math.ceil(row.length / 2);
-            const numberOfColumns = this.currentTetrimino.shapeArray[rowIndex].length;
+            const numberOfColumns = this.currentTetrimino.shapeMatrix[rowIndex].length;
             for (let columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
                 // this.grid[middleRowIndex + rowIndex][middleColumnIndex + columnIndex] = columnValue;
                 this.grid[5 - rowIndex][5 + columnIndex] =
-                    this.currentTetrimino.shapeArray[rowIndex][columnIndex];
+                    this.currentTetrimino.shapeMatrix[rowIndex][columnIndex];
             }
         };
         console.log('grid after update', this.grid);

@@ -1,10 +1,12 @@
 import { TetriminoShapeStore } from './tetrimino-shape-store.js';
 export class Tetrimino {
 
-    shapeArray;
-
+    shapeMatrix;
+    rotatedShapeMatrix;
     constructor(shapeIndex) {
-        this.shapeArray = TetriminoShapeStore[shapeIndex];
+        this.shapeMatrix = TetriminoShapeStore[shapeIndex];
+        this.rotatedShapeMatrix;
+        console.log('shape matrix', this.shapeMatrix);
     }
 
     rotate() {
