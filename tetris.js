@@ -7,7 +7,7 @@ import { GameGrid } from './models/game-grid.js'
  * ===============================================================
  **/
 let gameGrid = new GameGrid();
-let shapeIndex = 0;
+// let shapeIndex = 0; // TODO: Remove
 
 
 

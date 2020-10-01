@@ -37,6 +37,8 @@ export class GameGrid {
     }
 
     drawTetrimino() {
+        DrawService.clearCanvas();
+        this.clearGridData();
         this.updateGridData();
         this.drawGrid();
     }
@@ -44,17 +46,19 @@ export class GameGrid {
     updateGridData() {
         // const middleRowIndex = Math.floor(this.grid.length / 2);
         // const middleColumnIndex = Math.floor(this.grid[0].length / 2);
-        const numberOfRows = this.currentTetrimino.shapeMatrix.length;
-        for (let rowIndex = numberOfRows - 1; rowIndex >= 0; rowIndex--) {
-            // const horizShapeCenter = Math.ceil(row.length / 2);
-            const numberOfColumns = this.currentTetrimino.shapeMatrix[rowIndex].length;
-            for (let columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
-                // this.grid[middleRowIndex + rowIndex][middleColumnIndex + columnIndex] = columnValue;
-                this.grid[5 - rowIndex][5 + columnIndex] =
-                    this.currentTetrimino.shapeMatrix[rowIndex][columnIndex];
-            }
-        };
-        console.log('grid after update', this.grid);
+        if (this.currentTetrimino) {
+            const numberOfRows = this.currentTetrimino.rotatedShapeMatrix.length;
+            for (let rowIndex = numberOfRows - 1; rowIndex >= 0; rowIndex--) {
+                // const horizShapeCenter = Math.ceil(row.length / 2);
+                const numberOfColumns = this.currentTetrimino.rotatedShapeMatrix[rowIndex].length;
+                for (let columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
+                    // this.grid[middleRowIndex + rowIndex][middleColumnIndex + columnIndex] = columnValue;
+                    this.grid[5 - rowIndex][5 + columnIndex] =
+                        this.currentTetrimino.rotatedShapeMatrix[rowIndex][columnIndex];
+                }
+            };
+            console.log('grid after update', this.grid);
+        }
     }
 
     drawGrid() {
@@ -124,7 +128,7 @@ export class GameGrid {
 
     handleMovement(userInput) {
         switch (userInput) {
-            case 'up': this.currentTetrimino.rotate(); break;
+            case 'up': this.currentTetrimino.rotate(); this.drawTetrimino(); break;
             case 'down': break;
             case 'left': break;
             case 'right': break;
