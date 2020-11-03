@@ -11,7 +11,7 @@
 
  export let cellSquareSize = 25; // in pixels
 
- export let fallSpeed = 2000; // in milliseconds
+ export let fallSpeed = 1000; // in milliseconds
 
 /**=============================================================
  * ============================= UI =============================

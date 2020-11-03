@@ -34,16 +34,18 @@ export class GameGrid {
     createNewTetrimino(shapeIndex) {
         // const randomShapeIndex = Math.ceil(Math.random() * (6 - 0));
         const randomShapeIndex = shapeIndex;
-        this.currentTetrimino = new Tetrimino(randomShapeIndex);
+        this.currentTetrimino = new Tetrimino(randomShapeIndex, Math.floor(this.numberOfColumns / 2));
         console.log('new tetrimino', this.currentTetrimino);
     }
 
     drawTetrimino() {
-        DrawService.clearCanvas();
-        this.clearGridData(); // TODO: Remove; No need to redraw everything in the future. Just draw new tetrimino
-        this.updateGridData();
-        this.drawShapeBlocks();
-        this.drawGridLines();
+        if (!this.isShapeTouchingLeftWall() && !this.isShapeTouchingRightWall() && !this.isShapeAtRest()) {
+            DrawService.clearCanvas();
+            this.clearGridData(); // TODO: Remove; No need to redraw everything in the future. Just draw new tetrimino
+            this.updateGridData();
+            this.drawShapeBlocks();
+            this.drawGridLines();
+        }
     }
 
     updateGridData() {
@@ -58,7 +60,7 @@ export class GameGrid {
                 const numberOfColumns = this.currentTetrimino.rotatedShapeMatrix[rowIndex].length;
                 for (let columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
                     // this.grid[middleRowIndex + rowIndex][middleColumnIndex + columnIndex] = columnValue;
-                    this.grid[verticalOffset - rowIndex][horizontalOffset + columnIndex] =
+                    this.grid[verticalOffset + rowIndex][horizontalOffset + columnIndex] =
                         this.currentTetrimino.rotatedShapeMatrix[rowIndex][columnIndex];
                 }
             };
@@ -140,23 +142,55 @@ export class GameGrid {
     }
 
     moveTetriminoDown() {
-        this.currentTetrimino.updateVerticalOffset(1);
+        if (!this.isShapeAtRest()) {
+            this.currentTetrimino.updateVerticalOffset(1);
+        }
     }
 
     moveTetriminoLeft() {
-        this.currentTetrimino.updateHorizontalOffset(-1);
+        if (!this.isShapeTouchingLeftWall()) {
+            this.currentTetrimino.updateHorizontalOffset(-1);
+        }
     }
 
     moveTetriminoRight() {
-        this.currentTetrimino.updateHorizontalOffset(1);
+        if (!this.isShapeTouchingRightWall()) {
+            this.currentTetrimino.updateHorizontalOffset(1);
+        }
     }
 
-    isShapeGrounded() {
-        return false;
+    isShapeAtRest() {
+        const numberOfRowsInShape = this.currentTetrimino.rotatedShapeMatrix.length;
+        const bottomMostTileRowIndex = this.currentTetrimino.verticalOffset + numberOfRowsInShape;
+        return this.currentTetrimino.verticalOffset + numberOfRowsInShape >= this.numberOfRows ||
+            (bottomMostTileRowIndex < this.grid.length && this.grid[bottomMostTileRowIndex].some(number => !!number));
+        // return false;
     }
 
-    isShapeTouchingWall() {
-        return false;
+    isShapeTouchingLeftWall() {
+        let leftMostTileIndex = 0;
+        let tileColumnIndices = []
+        this.currentTetrimino.rotatedShapeMatrix.forEach((row, rowIndex) => {
+            row.forEach((column, columnIndex) => {
+                tileColumnIndices.push(this.currentTetrimino.horizontalOffset + columnIndex);
+            });
+        })
+        leftMostTileIndex = Math.min(...tileColumnIndices);
+
+        return leftMostTileIndex <= 0;
+        // return false;
+    }
+
+    isShapeTouchingRightWall() {
+        let rightMostTileIndex = 0;
+        let tileColumnIndices = []
+        this.currentTetrimino.rotatedShapeMatrix.forEach((row, rowIndex) => {
+            row.forEach((column, columnIndex) => {
+                tileColumnIndices.push(this.currentTetrimino.horizontalOffset + columnIndex);
+            });
+        });
+        rightMostTileIndex = Math.max(...tileColumnIndices);
+        return rightMostTileIndex >= this.grid[0].length;
     }
 
     isShapeTouchingOtherShape() {

@@ -26,7 +26,7 @@ document.querySelector('body')
 // TODO: Remove
 // setInterval(drawTetrimino, 900); // Don't use parentheses with the method call
 
-gameGrid.createNewTetrimino(5);
+gameGrid.createNewTetrimino(1);
 gameGrid.drawTetrimino();
 // clock = setInterval(moveTetriminoDown, GameConfig.fallSpeed); // Don't use parentheses with the method call
 
