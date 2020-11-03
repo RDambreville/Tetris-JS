@@ -9,8 +9,10 @@ export class GameGrid {
     numberOfRows;
     numberOfColumns;
     currentTetrimino;
+    // fallSpeed;
 
-    constructor() {
+    constructor(/*fallSpeed*/) {
+        // this.fallSpeed = fallSpeed;
         DrawService.setupCanvas(GameConfig.canvasHeight, GameConfig.canvasWidth, GameConfig.getIsDarkMode());
         DrawService.clearCanvas();
         this.numberOfRows = Math.floor(DrawService.getCanvasHeight() / GameConfig.cellSquareSize);
@@ -47,6 +49,8 @@ export class GameGrid {
     updateGridData() {
         // const middleRowIndex = Math.floor(this.grid.length / 2);
         // const middleColumnIndex = Math.floor(this.grid[0].length / 2);
+        const verticalOffset = this.currentTetrimino.verticalOffset;
+        const horizontalOffset = this.currentTetrimino.horizontalOffset;
         if (this.currentTetrimino) {
             const numberOfRows = this.currentTetrimino.rotatedShapeMatrix.length;
             for (let rowIndex = numberOfRows - 1; rowIndex >= 0; rowIndex--) {
@@ -54,7 +58,7 @@ export class GameGrid {
                 const numberOfColumns = this.currentTetrimino.rotatedShapeMatrix[rowIndex].length;
                 for (let columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
                     // this.grid[middleRowIndex + rowIndex][middleColumnIndex + columnIndex] = columnValue;
-                    this.grid[5 - rowIndex][5 + columnIndex] =
+                    this.grid[verticalOffset - rowIndex][horizontalOffset + columnIndex] =
                         this.currentTetrimino.rotatedShapeMatrix[rowIndex][columnIndex];
                 }
             };
@@ -80,13 +84,13 @@ export class GameGrid {
                         GameConfig.cellSquareSize
                     );
                 }
-                // Move the "paintbrush" forward to the right by however
+                // Move the cursor forward to the right by however
                 // many columns it takes to find a filled square
                 horizontalOffset = this.grid[rowIndex][columnIndex + 1] ? (columnIndex + 1) * GameConfig.cellSquareSize : initialHorizontalOffset;
             }
 
-            verticalOffset -= GameConfig.cellSquareSize; // Move the "paintbrush" upwards by 1 row;
-            horizontalOffset = initialHorizontalOffset; // move the "paintbrush" back to the beginning of the line like a carriage return
+            verticalOffset -= GameConfig.cellSquareSize; // Move the cursor upwards by 1 row;
+            horizontalOffset = initialHorizontalOffset; // move the cursor back to the beginning of the line like a carriage return
         };
     }
 
@@ -127,12 +131,39 @@ export class GameGrid {
     handleMovement(userInput) {
         switch (userInput) {
             case 'up': this.currentTetrimino.rotate(); this.drawTetrimino(); break;
-            case 'down': break;
-            case 'left': this.currentTetrimino.translate('left'); this.drawTetrimino(); break;
-            case 'right': this.currentTetrimino.translate('right'); this.drawTetrimino(); break;
+            case 'down': this.moveTetriminoDown(); this.drawTetrimino(); break;
+            case 'left': this.moveTetriminoLeft(); this.drawTetrimino(); break;
+            case 'right': this.moveTetriminoRight(); this.drawTetrimino(); break;
             case 'space': break;
             default: return null;
         }
     }
 
+    moveTetriminoDown() {
+        this.currentTetrimino.updateVerticalOffset(1);
+    }
+
+    moveTetriminoLeft() {
+        this.currentTetrimino.updateHorizontalOffset(-1);
+    }
+
+    moveTetriminoRight() {
+        this.currentTetrimino.updateHorizontalOffset(1);
+    }
+
+    isShapeGrounded() {
+        return false;
+    }
+
+    isShapeTouchingWall() {
+        return false;
+    }
+
+    isShapeTouchingOtherShape() {
+        return true;
+    }
+
+    isGameOver() {
+        return this.isShapeGrounded() && isShapeTouchingCeiling();
+    }
 }

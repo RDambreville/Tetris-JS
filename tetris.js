@@ -6,7 +6,7 @@ import { GameGrid } from './models/game-grid.js'
  * ====================== Variables ==============================
  * ===============================================================
  **/
-let gameGrid = new GameGrid();
+let gameGrid = new GameGrid(/*GameConfig.fallSpeed*/);
 // let shapeIndex = 0; // TODO: Remove
 
 
@@ -21,13 +21,14 @@ document.querySelector('#dark-mode-checkbox')
     .addEventListener('click', toggleDarkMode);
 
 document.querySelector('body')
-    .addEventListener('keyup', handleMovement);
+    .addEventListener('keydown', handleMovement);
 
 // TODO: Remove
 // setInterval(drawTetrimino, 900); // Don't use parentheses with the method call
 
-gameGrid.createNewTetrimino(0);
+gameGrid.createNewTetrimino(5);
 gameGrid.drawTetrimino();
+// clock = setInterval(moveTetriminoDown, GameConfig.fallSpeed); // Don't use parentheses with the method call
 
 
 
@@ -37,7 +38,9 @@ gameGrid.drawTetrimino();
  **/
 
 
-
+function moveTetriminoDown() {
+    gameGrid.handleMovement('down');
+}
  // TODO: Remove
 // function drawTetrimino(shapeIndex) {
 //     // if (shapeIndex === 7) {
@@ -77,11 +80,6 @@ function handleMovement(event) {
         case ' ': gameGrid.handleMovement();
         default: gameGrid.handleMovement(null); // keep the direction the same
     }
-}
-
-function setupCanvas() {
-    DrawService.setupCanvas(GameConfig.canvasHeight, GameConfig.canvasWidth, GameConfig.getIsDarkMode());
-    initPlayScreen();
 }
 
 function toggleDarkMode(clickEvent) {

@@ -8,6 +8,8 @@ export class Tetrimino {
     rotatedShapeMatrix = [];
     color;
     rotationIndex = 0;
+    horizontalOffset = 5;
+    verticalOffset = 5;
 
     constructor(shapeIndex) {
         this.shapeIndex = shapeIndex;
@@ -51,5 +53,13 @@ export class Tetrimino {
 
     translate(direction) {
         
+    }
+
+    updateHorizontalOffset(offsetToAdd) {
+        this.horizontalOffset += offsetToAdd;
+    }
+
+    updateVerticalOffset(offsetToAdd) {
+        this.verticalOffset += offsetToAdd;
     }
 }
