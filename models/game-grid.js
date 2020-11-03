@@ -163,7 +163,9 @@ export class GameGrid {
         const numberOfRowsInShape = this.currentTetrimino.rotatedShapeMatrix.length;
         const bottomMostTileRowIndex = this.currentTetrimino.verticalOffset + numberOfRowsInShape;
         return this.currentTetrimino.verticalOffset + numberOfRowsInShape >= this.numberOfRows ||
-            (bottomMostTileRowIndex < this.grid.length && this.grid[bottomMostTileRowIndex].some(number => !!number));
+            (bottomMostTileRowIndex < this.grid.length &&
+                bottomMostTileRowIndex + 1 < this.grid.length &&
+                this.grid[bottomMostTileRowIndex + 1].some(number => !!number));
         // return false;
     }
 
