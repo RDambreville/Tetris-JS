@@ -63,7 +63,7 @@ export class GameGrid {
     }
 
     drawShapeBlocks() {
-        DrawService.setFillColor('green');
+        DrawService.setFillColor(this.currentTetrimino.color);
         const initialHorizontalOffset = 5 * GameConfig.cellSquareSize;
         let horizontalOffset = 5 * GameConfig.cellSquareSize;
         let verticalOffset = this.numberOfRows * GameConfig.cellSquareSize;

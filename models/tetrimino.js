@@ -6,11 +6,14 @@ export class Tetrimino {
     // verticalOffsetOfCenter
     shapeMatrix;
     rotatedShapeMatrix = [];
+    color;
+    rotationIndex = 0;
 
     constructor(shapeIndex) {
         this.shapeIndex = shapeIndex;
         this.shapeMatrix = TetriminoShapeStore[shapeIndex];
-        this.rotatedShapeMatrix = this.shapeMatrix;
+        this.color = this.shapeMatrix.color;
+        this.rotatedShapeMatrix = this.shapeMatrix.rotations[this.rotationIndex];
         console.log('shape matrix', this.shapeMatrix);
     }
 
@@ -28,19 +31,25 @@ export class Tetrimino {
 
         // this.rotatedShapeMatrix = [];
         // const numberOfRowsBeforeTransform = this.shapeMatrix.length;
-        const newRotatedShapeMatrix = []
-        const numberOfRowsBeforeTransform = this.rotatedShapeMatrix.length;
-        for (let rowIndex = 0; rowIndex < numberOfRowsBeforeTransform; rowIndex++) {
-            const numberOfColumnsBeforeTransform = this.rotatedShapeMatrix[rowIndex].length;
-            for (let columnIndex = 0; columnIndex < numberOfColumnsBeforeTransform; columnIndex++) {
-                newRotatedShapeMatrix.push([this.rotatedShapeMatrix[rowIndex][columnIndex]]);
-            }
-            this.rotatedShapeMatrix = newRotatedShapeMatrix;
-            break;
-        }
+
+        // const newRotatedShapeMatrix = []
+        // const numberOfRowsBeforeTransform = this.rotatedShapeMatrix.length;
+        // for (let rowIndex = 0; rowIndex < numberOfRowsBeforeTransform; rowIndex++) {
+        //     const numberOfColumnsBeforeTransform = this.rotatedShapeMatrix[rowIndex].length;
+        //     for (let columnIndex = 0; columnIndex < numberOfColumnsBeforeTransform; columnIndex++) {
+        //         newRotatedShapeMatrix.push([this.rotatedShapeMatrix[rowIndex][columnIndex]]);
+        //     }
+        //     this.rotatedShapeMatrix = newRotatedShapeMatrix;
+        //     break;
+        // }
+
+        this.rotationIndex = this.rotationIndex + 1 < this.shapeMatrix.rotations.length ?
+            this.rotationIndex + 1 : 0;
+        this.rotatedShapeMatrix = this.shapeMatrix.rotations[this.rotationIndex]
+
     }
 
     translate(direction) {
-
+        
     }
 }
