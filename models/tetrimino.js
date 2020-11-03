@@ -26,13 +26,16 @@ export class Tetrimino {
         //     this.rotatedShapeMatrix = 
         // }
 
-        this.rotatedShapeMatrix = [];
-        const numberOfRowsBeforeTransform = this.shapeMatrix.length;
+        // this.rotatedShapeMatrix = [];
+        // const numberOfRowsBeforeTransform = this.shapeMatrix.length;
+        const newRotatedShapeMatrix = []
+        const numberOfRowsBeforeTransform = this.rotatedShapeMatrix.length;
         for (let rowIndex = 0; rowIndex < numberOfRowsBeforeTransform; rowIndex++) {
-            const numberOfColumnsBeforeTransform = this.shapeMatrix[rowIndex].length;
+            const numberOfColumnsBeforeTransform = this.rotatedShapeMatrix[rowIndex].length;
             for (let columnIndex = 0; columnIndex < numberOfColumnsBeforeTransform; columnIndex++) {
-                this.rotatedShapeMatrix.push([this.shapeMatrix[rowIndex][columnIndex]]);
+                newRotatedShapeMatrix.push([this.rotatedShapeMatrix[rowIndex][columnIndex]]);
             }
+            this.rotatedShapeMatrix = newRotatedShapeMatrix;
             break;
         }
     }

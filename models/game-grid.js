@@ -38,9 +38,10 @@ export class GameGrid {
 
     drawTetrimino() {
         DrawService.clearCanvas();
-        this.clearGridData();
+        this.clearGridData(); // TODO: Remove; No need to redraw everything in the future. Just draw new tetrimino
         this.updateGridData();
-        this.drawGrid();
+        this.drawShapeBlocks();
+        this.drawGridLines();
     }
 
     updateGridData() {
@@ -61,7 +62,7 @@ export class GameGrid {
         }
     }
 
-    drawGrid() {
+    drawShapeBlocks() {
         DrawService.setFillColor('green');
         const initialHorizontalOffset = 5 * GameConfig.cellSquareSize;
         let horizontalOffset = 5 * GameConfig.cellSquareSize;
@@ -87,7 +88,6 @@ export class GameGrid {
             verticalOffset -= GameConfig.cellSquareSize; // Move the "paintbrush" upwards by 1 row;
             horizontalOffset = initialHorizontalOffset; // move the "paintbrush" back to the beginning of the line like a carriage return
         };
-        this.drawGridLines();
     }
 
     drawGridLines() {
@@ -100,6 +100,7 @@ export class GameGrid {
             Math.floor(DrawService.getCanvasWidth() / GameConfig.cellSquareSize);
         let heightInterval = GameConfig.cellSquareSize;
         let widthInterval = GameConfig.cellSquareSize;
+
         // Draw horizontal grid lines
         for (let rowIndex = 0; rowIndex < numberOfRows; rowIndex++) {
             DrawService.drawLine(
@@ -121,17 +122,14 @@ export class GameGrid {
             );
             widthInterval += GameConfig.cellSquareSize;
         }
-
-
-        // DrawService.drawGrid();
     }
 
     handleMovement(userInput) {
         switch (userInput) {
             case 'up': this.currentTetrimino.rotate(); this.drawTetrimino(); break;
             case 'down': break;
-            case 'left': break;
-            case 'right': break;
+            case 'left': this.currentTetrimino.translate('left'); this.drawTetrimino(); break;
+            case 'right': this.currentTetrimino.translate('right'); this.drawTetrimino(); break;
             case 'space': break;
             default: return null;
         }
