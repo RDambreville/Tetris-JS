@@ -11,7 +11,7 @@
 
  export let cellSquareSize = 25; // in pixels
 
- export let fallSpeed = 1000; // in milliseconds
+ export let clockTickInterval = 500; // in milliseconds
 
 /**=============================================================
  * ============================= UI =============================
@@ -28,6 +28,6 @@ export function setIsDarkMode(_isDarkMode) {
     isDarkMode = _isDarkMode
 }
 
-export let canvasHeight = window.innerHeight;
+export let canvasHeight = 0.75 * window.innerHeight;
 
-export let canvasWidth = window.innerWidth / 2;
+export let canvasWidth = 0.50 * (window.innerWidth / 2);

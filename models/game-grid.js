@@ -1,4 +1,3 @@
-import * as GameConfig from '../config/game-config.js';
 import * as DrawService from '../../draw.js';
 import { Tetrimino } from './tetrimino.js';
 
@@ -9,14 +8,15 @@ export class GameGrid {
     numberOfRows;
     numberOfColumns;
     currentTetrimino;
-    // fallSpeed;
+    cellSquareSize;
+    score = 0;
 
-    constructor(/*fallSpeed*/) {
-        // this.fallSpeed = fallSpeed;
-        DrawService.setupCanvas(GameConfig.canvasHeight, GameConfig.canvasWidth, GameConfig.getIsDarkMode());
+    constructor(_canvasHeight, _canvasWidth, _cellSquareSize, _isDarkMode) {
+        DrawService.setupCanvas(_canvasHeight, _canvasWidth, _isDarkMode);
         DrawService.clearCanvas();
-        this.numberOfRows = Math.floor(DrawService.getCanvasHeight() / GameConfig.cellSquareSize);
-        this.numberOfColumns = Math.floor(DrawService.getCanvasWidth() / GameConfig.cellSquareSize);
+        this.cellSquareSize = _cellSquareSize;
+        this.numberOfRows = Math.ceil(_canvasHeight / this.cellSquareSize);
+        this.numberOfColumns = Math.ceil(_canvasWidth / this.cellSquareSize);
         this.clearGridData();
         console.log('empty grid', this.grid);
     }
@@ -31,20 +31,41 @@ export class GameGrid {
         }
     }
 
-    createNewTetrimino(shapeIndex) {
-        // const randomShapeIndex = Math.ceil(Math.random() * (6 - 0));
-        const randomShapeIndex = shapeIndex;
+    eraseOldTetriminoTiles() {
+        this.currentTetrimino.rotatedShapeMatrix = this.currentTetrimino.rotatedShapeMatrix.map(row => row = row.map(columnValue => columnValue = 0));
+        this.updateGridData();
+    }
+
+    createNewTetrimino(/*shapeIndex*/) {
+        const randomShapeIndex = Math.ceil(Math.random() * (6 - 0));
+        // const randomShapeIndex = /* shapeIndex*/ /*0*/;
         this.currentTetrimino = new Tetrimino(randomShapeIndex, Math.floor(this.numberOfColumns / 2));
         console.log('new tetrimino', this.currentTetrimino);
     }
 
-    drawTetrimino() {
+    drawScreen() {
         if (!this.isShapeTouchingLeftWall() && !this.isShapeTouchingRightWall() && !this.isShapeAtRest()) {
             DrawService.clearCanvas();
-            this.clearGridData(); // TODO: Remove; No need to redraw everything in the future. Just draw new tetrimino
+            // this.clearGridData();
+            // this.eraseOldTetriminoTiles(); // Erase old tile data and prepare to draw displaced shape
+            // Restore rotated shape and update the grid
+            this.currentTetrimino.rotatedShapeMatrix = this.currentTetrimino.shapeMatrix.rotations[this.currentTetrimino.rotationIndex];
+            this.updateGridData();
+            // this.updateGridData();
+            this.drawShapeBlocks();
+            this.drawGridLines();
+        } else if (this.isShapeAtRest()) {
+            this.currentTetrimino.rotatedShapeMatrix = this.currentTetrimino.shapeMatrix.rotations[this.currentTetrimino.rotationIndex];
             this.updateGridData();
             this.drawShapeBlocks();
             this.drawGridLines();
+            if (this.hasSolidRows()) {
+                const numberOfContiguousSolidRows = this.getRowStreak();
+                const totalNumberOfSolidRows = this.removeSolidRows();
+                this.score += this.awardPoints(totalNumberOfSolidRows, numberOfContiguousSolidRows);
+            }
+            this.createNewTetrimino();
+            this.drawScreen();
         }
     }
 
@@ -70,9 +91,9 @@ export class GameGrid {
 
     drawShapeBlocks() {
         DrawService.setFillColor(this.currentTetrimino.color);
-        const initialHorizontalOffset = 5 * GameConfig.cellSquareSize;
-        let horizontalOffset = 5 * GameConfig.cellSquareSize;
-        let verticalOffset = this.numberOfRows * GameConfig.cellSquareSize;
+        const initialHorizontalOffset = 5 * this.cellSquareSize;
+        let horizontalOffset = 5 * this.cellSquareSize;
+        let verticalOffset = this.numberOfRows * this.cellSquareSize;
 
         // Draw from the bottom up
         for (let rowIndex = this.numberOfRows - 1; rowIndex >= 0; rowIndex--) {
@@ -82,96 +103,129 @@ export class GameGrid {
                     DrawService.drawRectangle(
                         /*columnIndex +*/ horizontalOffset,
                         /*rowIndex +*/ verticalOffset,
-                        GameConfig.cellSquareSize,
-                        GameConfig.cellSquareSize
+                        this.cellSquareSize,
+                        this.cellSquareSize
                     );
                 }
                 // Move the cursor forward to the right by however
                 // many columns it takes to find a filled square
-                horizontalOffset = this.grid[rowIndex][columnIndex + 1] ? (columnIndex + 1) * GameConfig.cellSquareSize : initialHorizontalOffset;
+                horizontalOffset = this.grid[rowIndex][columnIndex + 1] ? (columnIndex + 1) * this.cellSquareSize : initialHorizontalOffset;
             }
 
-            verticalOffset -= GameConfig.cellSquareSize; // Move the cursor upwards by 1 row;
+            verticalOffset -= this.cellSquareSize; // Move the cursor upwards by 1 row;
             horizontalOffset = initialHorizontalOffset; // move the cursor back to the beginning of the line like a carriage return
         };
     }
 
     drawGridLines() {
-        // DrawService.setStrokeColor(GameConfig.getIsDarkMode() ? 'lightgray' : 'green');
-        // DrawService.setupCanvas(GameConfig.canvasHeight, GameConfig.canvasWidth, GameConfig.getIsDarkMode());
-        // clearScreen();
-        const numberOfRows =
-            Math.floor(DrawService.getCanvasHeight() / GameConfig.cellSquareSize);
-        const numberOfColumns =
-            Math.floor(DrawService.getCanvasWidth() / GameConfig.cellSquareSize);
-        let heightInterval = GameConfig.cellSquareSize;
-        let widthInterval = GameConfig.cellSquareSize;
+        // const numberOfRows =
+        //     Math.ceil(DrawService.getCanvasHeight() / this.cellSquareSize);
+        // const numberOfColumns =
+        //     Math.ceil(DrawService.getCanvasWidth() / this.cellSquareSize);
+        let verticalOffset = this.cellSquareSize;
+        let horizontalOffset = this.cellSquareSize;
 
         // Draw horizontal grid lines
-        for (let rowIndex = 0; rowIndex < numberOfRows; rowIndex++) {
+        for (let rowIndex = 0; rowIndex < this.numberOfRows; rowIndex++) {
             DrawService.drawLine(
-                DrawService.getMinHorizontalPosition(), // xStart
-                heightInterval, // yStart
-                DrawService.getMaxHorizontalPosition(), // xEnd
-                heightInterval // yEnd
+                DrawService.getMinXCoordinate(), // xStart
+                verticalOffset, // yStart
+                DrawService.getMaxXCoordinate(), // xEnd
+                verticalOffset // yEnd
             );
-            heightInterval += GameConfig.cellSquareSize;
+            verticalOffset += this.cellSquareSize;
         }
 
         // Draw verttical grid lines
-        for (let columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
+        for (let columnIndex = 0; columnIndex < this.numberOfColumns; columnIndex++) {
             DrawService.drawLine(
-                widthInterval, // xStart
-                DrawService.getMinVerticalPosition(), // yStart
-                widthInterval, // xEnd
-                DrawService.getMaxVerticalPosition() // yEnd
+                horizontalOffset, // xStart
+                DrawService.getMinYCoordinate(), // yStart
+                horizontalOffset, // xEnd
+                DrawService.getMaxYCoordinate() // yEnd
             );
-            widthInterval += GameConfig.cellSquareSize;
+            horizontalOffset += this.cellSquareSize;
         }
     }
 
     handleMovement(userInput) {
         switch (userInput) {
-            case 'up': this.currentTetrimino.rotate(); this.drawTetrimino(); break;
-            case 'down': this.moveTetriminoDown(); this.drawTetrimino(); break;
-            case 'left': this.moveTetriminoLeft(); this.drawTetrimino(); break;
-            case 'right': this.moveTetriminoRight(); this.drawTetrimino(); break;
+            case 'up': this.currentTetrimino.rotate(); this.drawScreen(); break;
+            case 'down': this.moveDown(); this.drawScreen(); break;
+            case 'left': this.moveLeft(); this.drawScreen(); break;
+            case 'right': this.moveRight(); this.drawScreen(); break;
             case 'space': break;
             default: return null;
         }
     }
 
-    moveTetriminoDown() {
-        if (!this.isShapeAtRest()) {
-            this.currentTetrimino.updateVerticalOffset(1);
-        }
+
+    rotate() {
+        this.eraseOldTetriminoTiles();
+        this.currentTetrimino.rotate();
+        this.updateGridData();
     }
 
-    moveTetriminoLeft() {
+    moveSideToSide(offsetToAdd) {
         if (!this.isShapeTouchingLeftWall()) {
-            this.currentTetrimino.updateHorizontalOffset(-1);
+            this.eraseOldTetriminoTiles();
+            this.currentTetrimino.updateHorizontalOffset(offsetToAdd);
+            this.updateGridData();
         }
     }
 
-    moveTetriminoRight() {
-        if (!this.isShapeTouchingRightWall()) {
-            this.currentTetrimino.updateHorizontalOffset(1);
+    moveDown() {
+        if (!this.isShapeAtRest()) {
+            this.eraseOldTetriminoTiles();
+            this.currentTetrimino.updateVerticalOffset(1);
+            this.updateGridData();
         }
+    }
+
+    // TODO: Consolidate to on method
+    moveLeft() {
+        if (!this.isShapeTouchingLeftWall()) {
+            this.eraseOldTetriminoTiles();
+            this.currentTetrimino.updateHorizontalOffset(-1);
+            this.updateGridData();
+        }
+    }
+
+    // TODO: Consolidate to on method
+    moveRight() {
+        if (!this.isShapeTouchingRightWall()) {
+            this.eraseOldTetriminoTiles();
+            this.currentTetrimino.updateHorizontalOffset(1);
+            this.updateGridData();
+        }
+    }
+
+    hasSolidRows() {
+        return this.grid.some(rows => !rows.some(columnValues => !columnValues));
+    }
+
+    removeSolidRows() {
+
+    }
+
+    getRowStreak() {
+
     }
 
     isShapeAtRest() {
         const numberOfRowsInShape = this.currentTetrimino.rotatedShapeMatrix.length;
-        const bottomMostTileRowIndex = this.currentTetrimino.verticalOffset + numberOfRowsInShape;
+        const rowIndexOfBottommostTile = this.currentTetrimino.verticalOffset + numberOfRowsInShape;
         return this.currentTetrimino.verticalOffset + numberOfRowsInShape >= this.numberOfRows ||
-            (bottomMostTileRowIndex < this.grid.length &&
-                bottomMostTileRowIndex + 1 < this.grid.length &&
-                this.grid[bottomMostTileRowIndex + 1].some(number => !!number));
-        // return false;
+            (rowIndexOfBottommostTile < this.grid.length &&
+                rowIndexOfBottommostTile + 1 < this.grid.length &&
+                this.grid[rowIndexOfBottommostTile + 1]
+                    .slice(this.currentTetrimino.horizontalOffset, this.currentTetrimino.rotatedShapeMatrix[0].length)
+                    .some(number => !!number));
     }
 
     isShapeTouchingLeftWall() {
         let leftMostTileIndex = 0;
-        let tileColumnIndices = []
+        let tileColumnIndices = [];
         this.currentTetrimino.rotatedShapeMatrix.forEach((row, rowIndex) => {
             row.forEach((column, columnIndex) => {
                 tileColumnIndices.push(this.currentTetrimino.horizontalOffset + columnIndex);
@@ -180,7 +234,6 @@ export class GameGrid {
         leftMostTileIndex = Math.min(...tileColumnIndices);
 
         return leftMostTileIndex <= 0;
-        // return false;
     }
 
     isShapeTouchingRightWall() {
@@ -199,7 +252,13 @@ export class GameGrid {
         return true;
     }
 
+    isShapeTouchingCeiling() {
+        const topMostTileRowIndex = this.currentTetrimino.verticalOffset /*+
+            this.currentTetrimino.rotatedShapeMatrix[this.currentTetrimino.rotatedShapeMatrix.length -1]*/;
+        return topMostTileRowIndex <= 0;
+    }
+
     isGameOver() {
-        return this.isShapeGrounded() && isShapeTouchingCeiling();
+        return this.isShapeAtRest() && this.isShapeTouchingCeiling();
     }
 }
