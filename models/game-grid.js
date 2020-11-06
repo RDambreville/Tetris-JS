@@ -93,7 +93,8 @@ export class GameGrid {
         // DrawService.setFillColor(this.currentTetrimino.color);
         const initialHorizontalOffset = 5 * this.cellSquareSize;
         let horizontalOffset = 5 * this.cellSquareSize;
-        let verticalOffset = this.numberOfRows * this.cellSquareSize;
+        // start drawing at the bottom and move up incrementally
+        let verticalOffset = (this.numberOfRows * this.cellSquareSize) - this.cellSquareSize; 
 
         // Draw from the bottom up
         for (let rowIndex = this.numberOfRows - 1; rowIndex >= 0; rowIndex--) {
