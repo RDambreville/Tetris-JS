@@ -1,6 +1,6 @@
 import * as DrawService from '../../draw.js';
 import { Tetrimino } from './tetrimino.js';
-
+import { GridCell } from './grid-cell.js'
 
 export class GameGrid {
 
@@ -26,7 +26,7 @@ export class GameGrid {
         for (let rowIndex = 0; rowIndex < this.numberOfRows; rowIndex++) {
             this.grid.push([]);
             for (let columnIndex = 0; columnIndex < this.numberOfColumns; columnIndex++) {
-                this.grid[rowIndex].push(0);
+                this.grid[rowIndex].push(new GridCell(null, 0));
             }
         }
     }
@@ -82,7 +82,7 @@ export class GameGrid {
                 for (let columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
                     // this.grid[middleRowIndex + rowIndex][middleColumnIndex + columnIndex] = columnValue;
                     this.grid[verticalOffset + rowIndex][horizontalOffset + columnIndex] =
-                        this.currentTetrimino.rotatedShapeMatrix[rowIndex][columnIndex];
+                        new GridCell(this.currentTetrimino.color, this.currentTetrimino.rotatedShapeMatrix[rowIndex][columnIndex]);
                 }
             };
             console.log('grid after update', this.grid);
@@ -90,7 +90,7 @@ export class GameGrid {
     }
 
     drawShapeBlocks() {
-        DrawService.setFillColor(this.currentTetrimino.color);
+        // DrawService.setFillColor(this.currentTetrimino.color);
         const initialHorizontalOffset = 5 * this.cellSquareSize;
         let horizontalOffset = 5 * this.cellSquareSize;
         let verticalOffset = this.numberOfRows * this.cellSquareSize;
@@ -98,8 +98,9 @@ export class GameGrid {
         // Draw from the bottom up
         for (let rowIndex = this.numberOfRows - 1; rowIndex >= 0; rowIndex--) {
             for (let columnIndex = 0; columnIndex < this.numberOfColumns; columnIndex++) {
-                const columnValue = this.grid[rowIndex][columnIndex];
+                const columnValue = this.grid[rowIndex][columnIndex].value;
                 if (columnValue) {
+                    DrawService.setFillColor(this.grid[rowIndex][columnIndex].color);
                     DrawService.drawRectangle(
                         /*columnIndex +*/ horizontalOffset,
                         /*rowIndex +*/ verticalOffset,
@@ -201,7 +202,7 @@ export class GameGrid {
     }
 
     hasSolidRows() {
-        return this.grid.some(rows => !rows.some(columnValues => !columnValues));
+        return this.grid.some(rows => !rows.some(gridCell => !gridCell.value));
     }
 
     removeSolidRows() {
