@@ -11,7 +11,7 @@
 
  export let cellSquareSize = 25; // in pixels
 
- export let clockTickInterval = 500; // in milliseconds
+ export let tickInterval = 500; // in milliseconds
 
 /**=============================================================
  * ============================= UI =============================

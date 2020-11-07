@@ -1,4 +1,5 @@
 import * as GameConfig from './config/game-config.js';
+import * as DrawService from '../draw.js';
 import { GameGrid } from './models/game-grid.js'
 
 /**===============================================================
@@ -50,7 +51,7 @@ function initGameScreen() {
 }
 
 function startGame() {
-    clock = setInterval(iterateGameLoop, GameConfig.clockTickInterval);
+    clock = setInterval(iterateGameLoop, GameConfig.tickInterval);
 }
 
 function iterateGameLoop() {
@@ -58,13 +59,14 @@ function iterateGameLoop() {
         if (!gameGrid.isGameOver()) {
             gameGrid.handleMovement('down');
         } else {
+            DrawService.drawText('Game Over!', GameConfig.canvasWidth / 2, GameConfig.canvasHeight / 2);
             releaseResources();
         }
     }
 }
 
 function handleMovement(event) {
-    console.log('keyPress event', event);
+    // console.log('keyPress event', event);
     if (gameGrid) {
         switch (event.key) {
             case 'w': gameGrid.handleMovement('up'); break;
