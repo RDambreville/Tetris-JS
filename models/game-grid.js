@@ -15,8 +15,8 @@ export class GameGrid {
         DrawService.setupCanvas(_canvasHeight, _canvasWidth, _isDarkMode);
         DrawService.clearCanvas();
         this.cellSquareSize = _cellSquareSize;
-        this.numberOfRows = Math.ceil(_canvasHeight / this.cellSquareSize);
-        this.numberOfColumns = Math.ceil(_canvasWidth / this.cellSquareSize);
+        this.numberOfRows = Math.ceil(_canvasHeight / this.cellSquareSize) - 1;
+        this.numberOfColumns = Math.ceil(_canvasWidth / this.cellSquareSize) - 1;
         this.clearGridData();
         console.log('empty grid', this.grid);
     }
@@ -60,9 +60,9 @@ export class GameGrid {
             this.drawShapeBlocks();
             this.drawGridLines();
             if (this.hasSolidRows()) {
-                const numberOfContiguousSolidRows = this.getRowStreak();
+                const maxNumberOfContiguousSolidRows = this.getRowStreak();
                 const totalNumberOfSolidRows = this.removeSolidRows();
-                this.score += this.awardPoints(totalNumberOfSolidRows, numberOfContiguousSolidRows);
+                this.score += this.awardPoints(totalNumberOfSolidRows, maxNumberOfContiguousSolidRows);
             }
             this.createNewTetrimino();
             this.drawScreen();
@@ -88,7 +88,7 @@ export class GameGrid {
                         horizontalOffset + columnIndex);
                 }
             };
-            console.log('grid after update', this.grid);
+            // console.log('grid after update', this.grid);
         }
     }
 
@@ -97,14 +97,14 @@ export class GameGrid {
         const initialHorizontalOffset = 5 * this.cellSquareSize;
         let horizontalOffset = 5 * this.cellSquareSize;
         // start drawing at the bottom and move up incrementally
-        let verticalOffset = (this.numberOfRows * this.cellSquareSize) - this.cellSquareSize; 
+        let verticalOffset = (this.numberOfRows * this.cellSquareSize) - this.cellSquareSize;
 
         // Draw from the bottom up
         for (let rowIndex = this.numberOfRows - 1; rowIndex >= 0; rowIndex--) {
             for (let columnIndex = 0; columnIndex < this.numberOfColumns; columnIndex++) {
-                const columnValue = this.grid[rowIndex][columnIndex].value;
-                if (columnValue) {
-                    DrawService.setFillColor(this.grid[rowIndex][columnIndex].color);
+                const gridCell = this.grid[rowIndex][columnIndex];
+                if (gridCell.value) {
+                    DrawService.setFillColor(gridCell.color);
                     DrawService.drawRectangle(
                         /*columnIndex +*/ horizontalOffset,
                         /*rowIndex +*/ verticalOffset,
@@ -155,17 +155,16 @@ export class GameGrid {
 
     handleMovement(userInput) {
         switch (userInput) {
-            case 'up': this.currentTetrimino.rotate(); this.drawScreen(); break;
-            case 'down': this.moveDown(); this.drawScreen(); break;
-            case 'left': this.moveLeft(); this.drawScreen(); break;
-            case 'right': this.moveRight(); this.drawScreen(); break;
+            case 'up': this.rotateShape(); this.drawScreen(); break;
+            case 'down': this.moveShapeDown(); this.drawScreen(); break;
+            case 'left': this.moveShapeLeft(); this.drawScreen(); break;
+            case 'right': this.moveShapeRight(); this.drawScreen(); break;
             case 'space': break;
             default: return null;
         }
     }
 
-
-    rotate() {
+    rotateShape() {
         this.eraseOldTetriminoTiles();
         this.currentTetrimino.rotate();
         this.updateGridData();
@@ -179,7 +178,7 @@ export class GameGrid {
         }
     }
 
-    moveDown() {
+    moveShapeDown() {
         if (!this.isShapeAtRest()) {
             this.eraseOldTetriminoTiles();
             this.currentTetrimino.updateVerticalOffset(1);
@@ -190,24 +189,40 @@ export class GameGrid {
     }
 
     // TODO: Consolidate to on method
-    moveLeft() {
+    moveShapeLeft() {
         if (!this.isShapeTouchingLeftWall()) {
             this.eraseOldTetriminoTiles();
             this.currentTetrimino.updateHorizontalOffset(-1);
             this.updateGridData();
         } else {
+            this.kickLeftWall();
             console.log('LEFT collision!', this);
         }
     }
 
     // TODO: Consolidate to on method
-    moveRight() {
+    moveShapeRight() {
         if (!this.isShapeTouchingRightWall()) {
             this.eraseOldTetriminoTiles();
             this.currentTetrimino.updateHorizontalOffset(1);
             this.updateGridData();
         } else {
+            this.kickRightWall();
             console.log('RIGHT collision!', this);
+        }
+    }
+
+    kickLeftWall() {
+        console.log('LEFT WALL KICKED!', this);
+        while (this.isShapeTouchingLeftWall()) {
+            this.moveShapeRight();
+        }
+    }
+
+    kickRightWall() {
+        console.log('RIGHT WALL KICKED!', this);
+        while (this.isShapeTouchingRightWall()) {
+            this.moveShapeLeft();
         }
     }
 
