@@ -209,25 +209,33 @@ export class GameGrid {
 
     // TODO: Consolidate to on method
     moveShapeLeft() {
-        if (!this.isShapeTouchingLeftWall()) {
+        const isShapeTouchingLeftWall = this.isShapeTouchingLeftWall();
+        const isShapeTouchingLeftPeer = this.isShapeTouchingLeftPeer();
+        if (!isShapeTouchingLeftWall && !isShapeTouchingLeftPeer) {
             this.eraseOldTetriminoTiles();
             this.currentTetrimino.updateHorizontalOffset(-1);
             this.updateGridData();
-        } else {
-            console.log('LEFT collision!', this);
+        } else if (isShapeTouchingLeftWall) {
+            console.log('LEFT WALL collision!', this);
             this.kickLeftWall();
+        } else if (isShapeTouchingLeftPeer) {
+            console.log('LEFT PEER collision!', this);
         }
     }
 
     // TODO: Consolidate to on method
     moveShapeRight() {
-        if (!this.isShapeTouchingRightWall()) {
+        const isShapeTouchingRightWall = this.isShapeTouchingRightWall();
+        const isShapeTouchingRightPeer = this.isShapeTouchingRightPeer();
+        if (!isShapeTouchingRightWall) {
             this.eraseOldTetriminoTiles();
             this.currentTetrimino.updateHorizontalOffset(1);
             this.updateGridData();
-        } else {
+        } else if (isShapeTouchingRightWall) {
             console.log('RIGHT collision!', this);
             this.kickRightWall();
+        } else if (isShapeTouchingRightPeer) {
+            console.log('RIGHT PEER collision!', this);
         }
     }
 
@@ -254,10 +262,6 @@ export class GameGrid {
     }
 
     getRowStreak() {
-
-    }
-
-    isCellPartOfShape(targetGridCell) {
 
     }
 
@@ -292,6 +296,16 @@ export class GameGrid {
     //     return ;
     // }
 
+    isCellPartOfShape(targetGridCell) {
+        return this.currentTetrimino.rotatedShapeMatrix.some((row, rowIndex) =>
+            row.some((column, columnIndex) => {
+                const shapeRowIndex = this.currentTetrimino.verticalOffset + rowIndex;
+                const shapeColumnIndex = this.currentTetrimino.horizontalOffset + columnIndex;
+                return targetGridCell.rowIndex === shapeRowIndex && targetGridCell.columnIndex === shapeColumnIndex;
+            })
+        );
+    }
+
     isShapeTouchingLeftWall() {
         let leftMostTileIndex = 0;
         let tileColumnIndices = [];
@@ -303,6 +317,21 @@ export class GameGrid {
         leftMostTileIndex = Math.min(...tileColumnIndices);
 
         return leftMostTileIndex <= 0;
+    }
+
+    isShapeTouchingLeftPeer() {
+        let isTouching = false;
+        isTouching = this.currentTetrimino.rotatedShapeMatrix.some((row, rowIndex) =>
+            row.some((column, columnIndex) => {
+                const shapeRowIndex = this.currentTetrimino.verticalOffset + rowIndex;
+                const shapeColumnIndex = this.currentTetrimino.horizontalOffset + columnIndex;
+                const currentGridCellInShape = this.grid[shapeRowIndex][shapeColumnIndex];
+                const leftGridCell = this.grid[shapeRowIndex][shapeColumnIndex-1]
+                return leftGridCell && leftGridCell.value && currentGridCellInShape && currentGridCellInShape.value &&
+                    !this.isCellPartOfShape(leftGridCell);
+            })
+        );
+        return isTouching;
     }
 
     isShapeTouchingRightWall() {
@@ -317,8 +346,19 @@ export class GameGrid {
         return rightMostTileIndex >= this.grid[0].length - 1;
     }
 
-    isShapeTouchingOtherShape() {
-        return true;
+    isShapeTouchingRightPeer() {
+        let isTouching = false;
+        isTouching = this.currentTetrimino.rotatedShapeMatrix.some((row, rowIndex) =>
+            row.some((column, columnIndex) => {
+                const shapeRowIndex = this.currentTetrimino.verticalOffset + rowIndex;
+                const shapeColumnIndex = this.currentTetrimino.horizontalOffset + columnIndex;
+                const currentGridCellInShape = this.grid[shapeRowIndex][shapeColumnIndex];
+                const rightGridCell = this.grid[shapeRowIndex][shapeColumnIndex + 1]
+                return rightGridCell && rightGridCell.value && currentGridCellInShape && currentGridCellInShape.value &&
+                    !this.isCellPartOfShape(rightGridCell);
+            })
+        );
+        return isTouching;
     }
 
     isShapeTouchingCeiling() {
