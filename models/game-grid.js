@@ -26,13 +26,14 @@ export class GameGrid {
         for (let rowIndex = 0; rowIndex < this.numberOfRows; rowIndex++) {
             this.grid.push([]);
             for (let columnIndex = 0; columnIndex < this.numberOfColumns; columnIndex++) {
-                this.grid[rowIndex].push(new GridCell(null, 0, rowIndex, columnIndex));
+                this.grid[rowIndex].push(new GridCell(null, 0, rowIndex, columnIndex, false));
             }
         }
     }
 
     eraseOldTetriminoTiles() {
-        this.currentTetrimino.rotatedShapeMatrix = this.currentTetrimino.rotatedShapeMatrix.map(row => row = row.map(columnValue => {return columnValue = 0}));
+        this.currentTetrimino.rotatedShapeMatrix = this.currentTetrimino.rotatedShapeMatrix
+            .map(row => row = row.map(columnValue => {return columnValue = 0}));
         this.updateGridData();
     }
 
@@ -47,7 +48,8 @@ export class GameGrid {
     drawScreen(isErasing) {
             DrawService.clearCanvas();
             // Restore rotated shape and update the grid
-            this.currentTetrimino.rotatedShapeMatrix = this.currentTetrimino.shapeMatrix.rotations[this.currentTetrimino.rotationIndex];
+            this.currentTetrimino.rotatedShapeMatrix =
+                this.currentTetrimino.shapeMatrix.rotations[this.currentTetrimino.rotationIndex];
             this.updateGridData(isErasing);
             this.drawShapeBlocks();
             this.drawGridLines();
@@ -61,27 +63,18 @@ export class GameGrid {
             for (let rowIndex = numberOfRows - 1; rowIndex >= 0; rowIndex--) {
                 const numberOfColumns = this.currentTetrimino.rotatedShapeMatrix[rowIndex].length;
                 for (let columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
+                    const isCellColored = this.currentTetrimino.rotatedShapeMatrix[rowIndex][columnIndex]
                     const fallingGridCell = new GridCell(
-                        this.currentTetrimino.color,
+                        isCellColored ? this.currentTetrimino.color : null,
                         this.currentTetrimino.rotatedShapeMatrix[rowIndex][columnIndex],
                         verticalOffset + rowIndex,
-                        horizontalOffset + columnIndex
+                        horizontalOffset + columnIndex,
+                        false
                     );
-
                     const restingGridCell = this.grid[verticalOffset + rowIndex][horizontalOffset + columnIndex];
-                    if (!isErasing /*&& !this.willUpdateDestoryLegalCell(fallingGridCell, restingGridCell)*/) {
-                        this.grid[verticalOffset + rowIndex][horizontalOffset + columnIndex] = fallingGridCell;
-                    } else if (isErasing && this.willUpdateDestoryLegalCell(fallingGridCell, restingGridCell)) {
-                        this.grid[verticalOffset + rowIndex][horizontalOffset + columnIndex] =  this.grid[verticalOffset + rowIndex][horizontalOffset + columnIndex];
-                    } else if (isErasing && !this.willUpdateDestoryLegalCell(fallingGridCell, restingGridCell)) {
+                    if ((this.isCellPartOfShape(restingGridCell) || !restingGridCell.value)) {
                         this.grid[verticalOffset + rowIndex][horizontalOffset + columnIndex] = fallingGridCell;
                     }
-                    // this.grid[verticalOffset + rowIndex][horizontalOffset + columnIndex] = new GridCell(
-                    //     this.currentTetrimino.color,
-                    //     this.currentTetrimino.rotatedShapeMatrix[rowIndex][columnIndex],
-                    //     verticalOffset + rowIndex,
-                    //     horizontalOffset + columnIndex
-                    // );
                 }
             };
             console.log('grid after update', this.grid);
@@ -113,7 +106,8 @@ export class GameGrid {
                 this.printRowAndColumnNumbers(rowIndex, columnIndex, horizontalOffset, verticalOffset);                
                 // Move the cursor forward to the right by however
                 // many columns it takes to find a filled square
-                horizontalOffset = this.grid[rowIndex][columnIndex + 1] ? (columnIndex + 1) * this.cellSquareSize : initialHorizontalOffset;
+                horizontalOffset = this.grid[rowIndex][columnIndex + 1] ?
+                    (columnIndex + 1) * this.cellSquareSize : initialHorizontalOffset;
             }
             // verticalOffset -= this.cellSquareSize; // Move the cursor upwards by 1 row;
             verticalOffset += this.cellSquareSize; // Move the cursor upwards by 1 row;
@@ -195,6 +189,7 @@ export class GameGrid {
         } else {
             console.log('BOTTOM collision!', this);
             this.currentTetrimino.rotatedShapeMatrix = this.currentTetrimino.shapeMatrix.rotations[this.currentTetrimino.rotationIndex];
+            this.lockShapeCells();
             this.updateGridData();
             // this.drawScreen();
             if (this.hasSolidRows()) {
@@ -227,12 +222,12 @@ export class GameGrid {
     moveShapeRight() {
         const isShapeTouchingRightWall = this.isShapeTouchingRightWall();
         const isShapeTouchingRightPeer = this.isShapeTouchingRightPeer();
-        if (!isShapeTouchingRightWall) {
+        if (!isShapeTouchingRightWall && !isShapeTouchingRightPeer) {
             this.eraseOldTetriminoTiles();
             this.currentTetrimino.updateHorizontalOffset(1);
             this.updateGridData();
         } else if (isShapeTouchingRightWall) {
-            console.log('RIGHT collision!', this);
+            console.log('RIGHT WALL collision!', this);
             this.kickRightWall();
         } else if (isShapeTouchingRightPeer) {
             console.log('RIGHT PEER collision!', this);
@@ -253,8 +248,20 @@ export class GameGrid {
         }
     }
 
+    lockShapeCells() {
+        this.currentTetrimino.rotatedShapeMatrix
+            .forEach((row, rowIndex) => row.forEach((columnValue, columnIndex) => {
+                this.grid[this.currentTetrimino.verticalOffset + rowIndex][this.currentTetrimino.horizontalOffset + columnIndex].isAtRest = true;
+            }));
+        // this.updateGridData();
+    }
+
     hasSolidRows() {
         return this.grid.some(rows => !rows.some(gridCell => !gridCell.value));
+    }
+
+    awardPoints() {
+        
     }
 
     removeSolidRows() {
@@ -284,8 +291,9 @@ export class GameGrid {
                     const shapeRowIndex = this.currentTetrimino.verticalOffset + rowIndex;
                     const shapeColumnIndex = this.currentTetrimino.horizontalOffset + columnIndex;
                     const fallingGridCell = this.grid[shapeRowIndex][shapeColumnIndex]; // TODO: Remove
-                    const blockingGridCell = this.grid[shapeRowIndex + 1] ? this.grid[shapeRowIndex + 1][shapeColumnIndex] : null;
-                    return blockingGridCell.value && fallingGridCell.value && blockingGridCell.rowIndex > rowIndexOfBottommostTile;
+                    const blockingGridCell = this.grid[shapeRowIndex + 1] ? this.grid[shapeRowIndex + 1][shapeColumnIndex] : {value : 0, rowIndex: rowIndexOfBottommostTile + 1 };
+                    return blockingGridCell.value && fallingGridCell.value && !this.isCellPartOfShape(blockingGridCell) &&
+                    blockingGridCell.columnIndex === fallingGridCell.columnIndex &&  blockingGridCell.rowIndex > rowIndexOfBottommostTile;
                 })
             );
         return isBlocked;
@@ -301,7 +309,15 @@ export class GameGrid {
             row.some((column, columnIndex) => {
                 const shapeRowIndex = this.currentTetrimino.verticalOffset + rowIndex;
                 const shapeColumnIndex = this.currentTetrimino.horizontalOffset + columnIndex;
-                return targetGridCell.rowIndex === shapeRowIndex && targetGridCell.columnIndex === shapeColumnIndex;
+                const isCellColored = this.currentTetrimino.rotatedShapeMatrix[rowIndex][columnIndex];
+                const currentGridCellInShape = this.grid[shapeRowIndex][shapeColumnIndex];
+                // new GridCell(
+                //     isCellColored ? this.currentTetrimino.color : null,
+                //     this.currentTetrimino.rotatedShapeMatrix[rowIndex][columnIndex],
+                //     shapeRowIndex,
+                //     shapeColumnIndex
+                // );
+                return currentGridCellInShape.value && !currentGridCellInShape.isAtRest && targetGridCell.rowIndex === shapeRowIndex && targetGridCell.columnIndex === shapeColumnIndex;
             })
         );
     }
