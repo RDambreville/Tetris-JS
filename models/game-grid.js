@@ -190,16 +190,27 @@ export class GameGrid {
             console.log('BOTTOM collision!', this);
             this.currentTetrimino.rotatedShapeMatrix = this.currentTetrimino.shapeMatrix.rotations[this.currentTetrimino.rotationIndex];
             this.lockShapeCells();
-            this.updateGridData();
+            // this.updateGridData();
             // this.drawScreen();
-            if (this.hasSolidRows()) {
+            const solidRowIndices = this.getSolidRowIndices();
+            if (this.hasSolidRows(solidRowIndices)) {
                 const maxNumberOfContiguousSolidRows = this.getRowStreak();
                 const totalNumberOfSolidRows = this.removeSolidRows();
+                // this.clearSolidRows(solidRowIndices);
+                // this.closeGaps();
                 this.score += this.awardPoints(totalNumberOfSolidRows, maxNumberOfContiguousSolidRows);
             }
             this.createNewTetrimino();
             this.drawScreen();
         }
+    }
+
+    clearSolidRows(solidRowIndices) {
+        solidRowIndices.forEach(index => this.grid[index] = this.grid[index].map(gridCell => gridCell = new GridCell(null, 0, gridCell.rowIndex, gridCell.columnIndex, false)));
+    }
+
+    closeGaps() {
+        this.updateGridData();
     }
 
     // TODO: Consolidate to on method
@@ -256,8 +267,17 @@ export class GameGrid {
         // this.updateGridData();
     }
 
-    hasSolidRows() {
-        return this.grid.some(rows => !rows.some(gridCell => !gridCell.value));
+    hasSolidRows(indicesOfSolidRows) {
+        return indicesOfSolidRows && indicesOfSolidRows.length > 0;
+    }
+
+    getSolidRowIndices() {
+        const indicesOfSolidRows = [];
+        this.grid.forEach((row, rowIndex) => {
+            if (!row.some(gridCell => !gridCell.value)) {
+                indicesOfEmptyRows.push(rowIndex);
+            }
+        });
     }
 
     awardPoints() {
