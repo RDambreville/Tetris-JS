@@ -93,6 +93,7 @@ function toggleDarkMode(clickEvent) {
 }
 
 function releaseResources() {
+    clearInterval(clock);
     clock = null;
     gameGrid = null;
 }
