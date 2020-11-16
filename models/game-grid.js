@@ -219,12 +219,11 @@ export class GameGrid {
             while(rowIndex > 0) {
                 if (rowIndex < this.numberOfRows) {
                     if (this.isRowEmpty(this.grid[rowIndex])) {
-                        // this.grid[rowIndex - 1] = this.grid[rowIndex - 1].map(gridCell => new GridCell());
                         this.grid[rowIndex - 1].forEach(gridCell => { gridCell.rowIndex++; });
                         this.grid[rowIndex] = this.grid[rowIndex - 1];
                         this.grid[rowIndex - 1] = this.grid[rowIndex - 1].map(gridCell => gridCell = new GridCell(null, 0, gridCell.rowIndex, gridCell.columnIndex));
-                        rowIndex--;
                     }
+                    rowIndex--;
                 }
             }
         })
