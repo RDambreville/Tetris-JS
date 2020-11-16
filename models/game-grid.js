@@ -34,7 +34,7 @@ export class GameGrid {
     eraseOldTetriminoTiles() {
         this.currentTetrimino.rotatedShapeMatrix = this.currentTetrimino.rotatedShapeMatrix
             .map(row => row = row.map(columnValue => {return columnValue = 0}));
-        this.updateGridData();
+        this.updateShapeInGrid();
     }
 
     createNewTetrimino(/*shapeIndex*/) {
@@ -50,12 +50,12 @@ export class GameGrid {
             // Restore rotated shape and update the grid
             this.currentTetrimino.rotatedShapeMatrix =
                 this.currentTetrimino.shapeMatrix.rotations[this.currentTetrimino.rotationIndex];
-            this.updateGridData(isErasing);
+            this.updateShapeInGrid(isErasing);
             this.drawShapeBlocks();
             this.drawGridLines();
     }
 
-    updateGridData(isErasing) {
+    updateShapeInGrid(isErasing) {
         const verticalOffset = this.currentTetrimino.verticalOffset;
         const horizontalOffset = this.currentTetrimino.horizontalOffset;
         if (this.currentTetrimino) {
@@ -169,14 +169,14 @@ export class GameGrid {
     rotateShape() {
         this.eraseOldTetriminoTiles();
         this.currentTetrimino.rotate();
-        this.updateGridData();
+        this.updateShapeInGrid();
     }
 
     moveSideToSide(offsetToAdd) {
         if (!this.isShapeTouchingLeftWall()) {
             this.eraseOldTetriminoTiles();
             this.currentTetrimino.updateHorizontalOffset(offsetToAdd);
-            this.updateGridData();
+            this.updateShapeInGrid();
         }
     }
 
@@ -184,20 +184,20 @@ export class GameGrid {
         if (!this.isShapeAtRest()) {
             this.eraseOldTetriminoTiles();
             this.currentTetrimino.updateVerticalOffset(1);
-            // this.updateGridData();
+            // this.updateShapeInGrid();
             this.drawScreen(true);
         } else {
             console.log('BOTTOM collision!', this);
             this.currentTetrimino.rotatedShapeMatrix = this.currentTetrimino.shapeMatrix.rotations[this.currentTetrimino.rotationIndex];
             this.lockShapeCells();
-            // this.updateGridData();
+            this.updateShapeInGrid();
             // this.drawScreen();
             const solidRowIndices = this.getSolidRowIndices();
             if (this.hasSolidRows(solidRowIndices)) {
                 const maxNumberOfContiguousSolidRows = this.getRowStreak();
                 const totalNumberOfSolidRows = this.removeSolidRows();
-                // this.clearSolidRows(solidRowIndices);
-                // this.closeGaps();
+                this.clearSolidRows(solidRowIndices);
+                this.closeGaps(solidRowIndices);
                 this.score += this.awardPoints(totalNumberOfSolidRows, maxNumberOfContiguousSolidRows);
             }
             this.createNewTetrimino();
@@ -209,8 +209,32 @@ export class GameGrid {
         solidRowIndices.forEach(index => this.grid[index] = this.grid[index].map(gridCell => gridCell = new GridCell(null, 0, gridCell.rowIndex, gridCell.columnIndex, false)));
     }
 
-    closeGaps() {
-        this.updateGridData();
+    closeGaps(solidRowIndices) {
+        solidRowIndices = solidRowIndices.sort((a, b) => b - a); // Sort in descending order
+        // loop from the bottom up
+        solidRowIndices.forEach(rowIndex => {
+            if (rowIndex === 0) {
+                return;
+            }
+            while(rowIndex > 0) {
+                if (rowIndex < this.numberOfRows) {
+                    if (this.isRowEmpty(this.grid[rowIndex])) {
+                        // this.grid[rowIndex - 1] = this.grid[rowIndex - 1].map(gridCell => new GridCell());
+                        this.grid[rowIndex - 1].forEach(gridCell => { gridCell.rowIndex++; });
+                        this.grid[rowIndex] = this.grid[rowIndex - 1];
+                        this.grid[rowIndex - 1] = this.grid[rowIndex - 1].map(gridCell => gridCell = new GridCell(null, 0, gridCell.rowIndex, gridCell.columnIndex));
+                        rowIndex--;
+                    }
+                }
+            }
+        })
+    }
+
+    isRowEmpty(row) {
+        if (row && row.length) {
+            return !row.some(gridCell => gridCell.color && gridCell.value);
+        }
+        return false;
     }
 
     // TODO: Consolidate to on method
@@ -220,7 +244,7 @@ export class GameGrid {
         if (!isShapeTouchingLeftWall && !isShapeTouchingLeftPeer) {
             this.eraseOldTetriminoTiles();
             this.currentTetrimino.updateHorizontalOffset(-1);
-            this.updateGridData();
+            this.updateShapeInGrid();
         } else if (isShapeTouchingLeftWall) {
             console.log('LEFT WALL collision!', this);
             this.kickLeftWall();
@@ -236,7 +260,7 @@ export class GameGrid {
         if (!isShapeTouchingRightWall && !isShapeTouchingRightPeer) {
             this.eraseOldTetriminoTiles();
             this.currentTetrimino.updateHorizontalOffset(1);
-            this.updateGridData();
+            this.updateShapeInGrid();
         } else if (isShapeTouchingRightWall) {
             console.log('RIGHT WALL collision!', this);
             this.kickRightWall();
@@ -264,7 +288,7 @@ export class GameGrid {
             .forEach((row, rowIndex) => row.forEach((columnValue, columnIndex) => {
                 this.grid[this.currentTetrimino.verticalOffset + rowIndex][this.currentTetrimino.horizontalOffset + columnIndex].isAtRest = true;
             }));
-        // this.updateGridData();
+        // this.updateShapeInGrid();
     }
 
     hasSolidRows(indicesOfSolidRows) {
@@ -275,9 +299,10 @@ export class GameGrid {
         const indicesOfSolidRows = [];
         this.grid.forEach((row, rowIndex) => {
             if (!row.some(gridCell => !gridCell.value)) {
-                indicesOfEmptyRows.push(rowIndex);
+                indicesOfSolidRows.push(rowIndex);
             }
         });
+        return indicesOfSolidRows;
     }
 
     awardPoints() {
