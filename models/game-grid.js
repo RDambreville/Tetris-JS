@@ -38,11 +38,18 @@ export class GameGrid {
     }
 
     createNewTetrimino(/*shapeIndex*/) {
-        const randomShapeIndex = Math.ceil(Math.random() * (6 - 0));
+        const randomShapeIndex = this.getRandomIntInRange(0, 6);
+        // const randomShapeIndex = Math.ceil(Math.random() * (6 - 0));
         // const randomShapeIndex = /* shapeIndex*/ /*0*/;
         const startColumnIndex = Math.floor(this.numberOfColumns / 2) - 1;
         this.currentTetrimino = new Tetrimino(randomShapeIndex, startColumnIndex);
         console.log('new tetrimino', this.currentTetrimino);
+    }
+
+    getRandomIntInRange(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
     drawScreen(isErasing) {
