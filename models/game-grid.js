@@ -329,14 +329,14 @@ export class GameGrid {
 
     isShapeBlockedFromBelow(rowIndexOfBottommostTile) {
         let isBlocked = false;
-        isBlocked = 
+        isBlocked =
             this.currentTetrimino.rotatedShapeMatrix.some((row, rowIndex) =>
                 row.some((column, columnIndex) => {
                     const shapeRowIndex = this.currentTetrimino.verticalOffset + rowIndex;
                     const shapeColumnIndex = this.currentTetrimino.horizontalOffset + columnIndex;
                     const fallingGridCell = this.grid[shapeRowIndex][shapeColumnIndex]; // TODO: Remove
                     const blockingGridCell = this.grid[shapeRowIndex + 1] ? this.grid[shapeRowIndex + 1][shapeColumnIndex] : {value : 0, rowIndex: rowIndexOfBottommostTile + 1 };
-                    return blockingGridCell.value && fallingGridCell.value && !this.isCellPartOfShape(blockingGridCell) &&
+                    return blockingGridCell.value && fallingGridCell.value && !this.isCellPartOfShape(blockingGridCell) && this.isCellPartOfShape(fallingGridCell)
                     blockingGridCell.columnIndex === fallingGridCell.columnIndex &&  blockingGridCell.rowIndex > rowIndexOfBottommostTile;
                 })
             );
