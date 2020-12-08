@@ -22,13 +22,14 @@ export class Tetrimino {
         this.rotationIndex = this.rotationIndex + 1 < this.shapeMatrix.rotations.length ?
             this.rotationIndex + 1 : 0;
         this.rotatedShapeMatrix = this.shapeMatrix.rotations[this.rotationIndex]
+        return this;
     }
 
-    updateHorizontalOffset(offsetToAdd) {
-        this.horizontalOffset += offsetToAdd;
+    updateHorizontalOffset(offsetChange) {
+        this.horizontalOffset += offsetChange;
     }
 
-    updateVerticalOffset(offsetToAdd) {
-        this.verticalOffset += offsetToAdd;
+    updateVerticalOffset(offsetChange) {
+        this.verticalOffset += offsetChange;
     }
 }

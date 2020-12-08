@@ -1,5 +1,5 @@
 import * as GameConfig from './config/game-config.js';
-import * as DrawService from '../draw.js';
+import { drawText } from '../draw.js';
 import { GameGrid } from './models/game-grid.js'
 
 /**===============================================================
@@ -45,7 +45,8 @@ function initGameScreen() {
         GameConfig.canvasHeight,
         GameConfig.canvasWidth,
         GameConfig.cellSquareSize,
-        GameConfig.getIsDarkMode());
+        GameConfig.getIsDarkMode()
+    );
     gameGrid.createNewTetrimino(/*1*/);
     gameGrid.drawScreen();
 }
@@ -59,7 +60,7 @@ function iterateGameLoop() {
         if (!gameGrid.isGameOver()) {
             gameGrid.handleMovement('down');
         } else {
-            DrawService.drawText('Game Over!', GameConfig.canvasWidth / 2, GameConfig.canvasHeight / 2);
+            drawText('Game Over!', GameConfig.canvasWidth / 2, GameConfig.canvasHeight / 2);
             releaseResources();
         }
     }
