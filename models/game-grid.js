@@ -70,7 +70,7 @@ export class GameGrid {
             for (let rowIndex = numberOfRows - 1; rowIndex >= 0; rowIndex--) {
                 const numberOfColumns = this.currentTetrimino.rotatedShapeMatrix[rowIndex].length;
                 for (let columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
-                    const isCellColored = this.currentTetrimino.rotatedShapeMatrix[rowIndex][columnIndex]
+                    const isCellColored = this.currentTetrimino.rotatedShapeMatrix[rowIndex][columnIndex];
                     const fallingGridCell = new GridCell(
                         isCellColored ? this.currentTetrimino.color : null,
                         this.currentTetrimino.rotatedShapeMatrix[rowIndex][columnIndex],
@@ -237,9 +237,9 @@ export class GameGrid {
                     if (this.isRowEmpty(this.grid[rowIndex])) {
                         this.grid[rowIndex - 1].forEach(gridCell => { gridCell.rowIndex++; });
                         this.grid[rowIndex] = this.grid[rowIndex - 1];
-                        this.grid[rowIndex - 1] = this.grid[rowIndex - 1].map(gridCell =>
-                            gridCell = new GridCell(null, 0, gridCell.rowIndex, gridCell.columnIndex)
-                        );
+                        // this.grid[rowIndex - 1] = this.grid[rowIndex - 1].map(gridCell =>
+                        //     gridCell = new GridCell(null, 0, gridCell.rowIndex, gridCell.columnIndex)
+                        // );
                     }
                     rowIndex--;
                 }
