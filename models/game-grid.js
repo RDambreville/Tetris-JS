@@ -208,9 +208,12 @@ export class GameGrid {
             if (this.hasSolidRows(solidRowIndices)) {
                 const maxNumberOfContiguousSolidRows = this.getRowStreak();
                 const totalNumberOfSolidRows = this.removeSolidRows();
+                const gapStartIndex = this.currentTetrimino.verticalOffset + (this.currentTetrimino.rotatedShapeMatrix.length - 1);
                 this.clearSolidRows(solidRowIndices);
-                this.closeGaps(solidRowIndices);
-                this.score += this.awardPoints(totalNumberOfSolidRows, maxNumberOfContiguousSolidRows);
+                this.closeGaps(gapStartIndex);
+                this.correctRowIndices();
+                this.awardPoints(totalNumberOfSolidRows, maxNumberOfContiguousSolidRows);
+                this.speedUp();
             }
             this.createNewTetrimino();
             this.drawScreen();
@@ -225,26 +228,38 @@ export class GameGrid {
         );
     }
 
-    closeGaps(solidRowIndices) {
-        solidRowIndices = solidRowIndices.sort((a, b) => b - a); // Sort in descending order
-        // loop from the bottom up
-        solidRowIndices.forEach(rowIndex => {
-            if (rowIndex === 0) {
-                return;
+    closeGaps(bottomRowIndex) {
+
+        // if (bottomRowIndex === 0) {
+        //     return;
+        // }
+        // // If the current row is empty, then close the gap
+        // if (this.isRowEmpty(this.grid[bottomRowIndex])) {
+        //     // Pull the row above down by 1
+        //     this.grid[bottomRowIndex - 1].forEach(gridCell => { gridCell.rowIndex++; });
+        //     this.grid[bottomRowIndex] = this.grid[bottomRowIndex - 1];
+        //     this.grid[bottomRowIndex - 1] = this.grid[bottomRowIndex - 1].map(gridCell =>
+        //         gridCell = new GridCell(null, 0, gridCell.rowIndex, gridCell.columnIndex)
+        //     );
+        // }
+        // // If the row above is emtpy
+        // // if (this.isRowEmpty(this.grid[bottomRowIndex - 1]))
+        // this.closeGaps(bottomRowIndex - 1);
+
+        if (bottomRowIndex === 0) {
+            return;
+        }
+        // If the current row is empty, then close the gap
+        if (this.isRowEmpty(this.grid[bottomRowIndex])) {
+            const gapDistance =  this.getGapDistance(bottomRowIndex);
+            let i = bottomRowIndex - gapDistance;
+            for (i; i >= 0; i-- ) {
+                this.grid[i].forEach(gridCell => { 
+                    gridCell.rowIndex += gapDistance;
+                    this.grid[gridCell.rowIndex] = this.grid[i]; 
+                });
             }
-            while(rowIndex > 0) {
-                if (rowIndex < this.numberOfRows) {
-                    if (this.isRowEmpty(this.grid[rowIndex])) {
-                        this.grid[rowIndex - 1].forEach(gridCell => { gridCell.rowIndex++; });
-                        this.grid[rowIndex] = this.grid[rowIndex - 1];
-                        // this.grid[rowIndex - 1] = this.grid[rowIndex - 1].map(gridCell =>
-                        //     gridCell = new GridCell(null, 0, gridCell.rowIndex, gridCell.columnIndex)
-                        // );
-                    }
-                    rowIndex--;
-                }
-            }
-        })
+        }
     }
 
     isRowEmpty(row) {
@@ -252,6 +267,46 @@ export class GameGrid {
             return !row.some(gridCell => gridCell.color && gridCell.value);
         }
         return false;
+    }
+
+    getGapDistance(bottomRowIndex) {
+        let distance = 1;
+        if (bottomRowIndex === 0) {
+            return;
+        }
+        while (this.isRowEmpty(this.grid[bottomRowIndex - 1])) {
+            distance++;
+            bottomRowIndex--;
+        }
+        return distance;
+    }
+
+    correctRowIndices() {
+        // this.grid.forEach((row, rowIndex) => {
+        //     row.forEach(gridCell => { 
+        //         const newGridCell = Object.assign(gridCell);
+        //         newGridCell.rowIndex = rowIndex;
+        //         gridCell = newGridCell;
+        //     });
+        // });
+        // let i = 0;
+        // let j = 0;
+        // const newGrid = [];
+        // for (let i = 0; i < this.numberOfRows; i++) {
+        //     const newRow = []
+        //     for (let j = 0; j < this.numberOfColumns; j++) {
+        //         const newColumn = Object.assign(this.grid[i][j]);
+        //         newColumn.rowIndex = i;
+        //         newRow.push(newColumn);
+        //         // this.grid[i][j].rowIndex = i;
+        //     }
+        //     newGrid[i] = newRow;
+        // }
+        // return newGrid
+
+        for (let i = 0; i < this.numberOfRows; i++) {
+            this.grid[i] = this.grid[i].map(gridCell => new GridCell(gridCell.color, gridCell.value, i, gridCell.columnIndex, gridCell.isAtRest));
+        }
     }
 
     // TODO: Consolidate to one method
@@ -322,8 +377,11 @@ export class GameGrid {
         return indicesOfSolidRows;
     }
 
-    awardPoints() {
-        
+    awardPoints(totalNumberOfSolidRows, maxNumberOfContiguousSolidRows) {
+        this.score += 0; 
+    }
+
+    speedUp() {
     }
 
     removeSolidRows() {
