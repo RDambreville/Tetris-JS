@@ -1,0 +1,12 @@
+.board {
+    position: absolute;
+    left: 0;
+}
+
+.game-info {
+    position: absolute;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    
+}

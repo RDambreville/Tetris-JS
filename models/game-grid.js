@@ -88,12 +88,6 @@ export class GameGrid {
         }
     }
 
-    // TODO: Remove
-    willUpdateDestoryLegalCell(fallingGridCell, restingGridCell) {
-        return !fallingGridCell.value && restingGridCell.value;
-        // return false;
-    }
-
     drawShapeBlocks() {
         const initialHorizontalOffset = 0;
         let horizontalOffset = 0;
@@ -282,28 +276,6 @@ export class GameGrid {
     }
 
     correctRowIndices() {
-        // this.grid.forEach((row, rowIndex) => {
-        //     row.forEach(gridCell => { 
-        //         const newGridCell = Object.assign(gridCell);
-        //         newGridCell.rowIndex = rowIndex;
-        //         gridCell = newGridCell;
-        //     });
-        // });
-        // let i = 0;
-        // let j = 0;
-        // const newGrid = [];
-        // for (let i = 0; i < this.numberOfRows; i++) {
-        //     const newRow = []
-        //     for (let j = 0; j < this.numberOfColumns; j++) {
-        //         const newColumn = Object.assign(this.grid[i][j]);
-        //         newColumn.rowIndex = i;
-        //         newRow.push(newColumn);
-        //         // this.grid[i][j].rowIndex = i;
-        //     }
-        //     newGrid[i] = newRow;
-        // }
-        // return newGrid
-
         for (let i = 0; i < this.numberOfRows; i++) {
             this.grid[i] = this.grid[i].map(gridCell => new GridCell(gridCell.color, gridCell.value, i, gridCell.columnIndex, gridCell.isAtRest));
         }
@@ -413,17 +385,10 @@ export class GameGrid {
                     const fallingGridCell = this.grid[shapeRowIndex][shapeColumnIndex]; // TODO: Remove
                     const blockingGridCell = this.grid[shapeRowIndex + 1] ? this.grid[shapeRowIndex + 1][shapeColumnIndex] : {value : 0, rowIndex: rowIndexOfBottommostTile + 1 };
                     return blockingGridCell.value && fallingGridCell.value && !this.isCellPartOfShape(blockingGridCell) && this.isCellPartOfShape(fallingGridCell);
-                    // TODO: Remove
-                    // blockingGridCell.columnIndex === fallingGridCell.columnIndex &&  blockingGridCell.rowIndex > rowIndexOfBottommostTile;
                 })
             );
         return isBlocked;
     }
-
-    // TODO: Remove
-    // isBlockingCellOutsideFallingShape(blockingGridCell, shapeRowIndex, shapeColumnIndex, rowIndexOfBottommostTile) {
-    //     return ;
-    // }
 
     isCellPartOfShape(targetGridCell) {
         return this.currentTetrimino.rotatedShapeMatrix.some((row, rowIndex) =>
@@ -432,12 +397,6 @@ export class GameGrid {
                 const shapeColumnIndex = this.currentTetrimino.horizontalOffset + columnIndex;
                 const isCellColored = this.currentTetrimino.rotatedShapeMatrix[rowIndex][columnIndex];
                 const currentGridCellInShape = this.grid[shapeRowIndex][shapeColumnIndex];
-                // new GridCell(
-                //     isCellColored ? this.currentTetrimino.color : null,
-                //     this.currentTetrimino.rotatedShapeMatrix[rowIndex][columnIndex],
-                //     shapeRowIndex,
-                //     shapeColumnIndex
-                // );
                 return currentGridCellInShape.value && !currentGridCellInShape.isAtRest && targetGridCell.rowIndex === shapeRowIndex && targetGridCell.columnIndex === shapeColumnIndex;
             })
         );
@@ -506,6 +465,5 @@ export class GameGrid {
 
     isGameOver() {
         return this.isShapeAtRest() && this.isShapeTouchingCeiling();
-        // return true;
     }
 }

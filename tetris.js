@@ -21,8 +21,8 @@ let clock;
 document.querySelector('#start-button')
     .addEventListener('click', startGame);
 
-document.querySelector('#dark-mode-checkbox')
-    .addEventListener('click', toggleDarkMode);
+// document.querySelector('#dark-mode-checkbox')
+//     .addEventListener('click', toggleDarkMode);
 
 document.querySelector('body')
     .addEventListener('keydown', handleMovement);

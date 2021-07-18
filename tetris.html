@@ -4,14 +4,34 @@
         <!-- <script type="module" src="../draw.js"></script>
         <script type="module" src="snake.js"></script> -->
         <!-- <script type="application/javascript" src="snake.js"></script> -->
+        <link rel="stylesheet" src="./tetris.scss">
     </head>
     <body>
-        <button id="start-button">Start Game</button>
+        <!-- <button id="start-button">Start Game</button>
         <input id="dark-mode-checkbox" type="checkbox">
         <label>Dark Mode</label>
-        </br>
+        </br> -->
         <!-- <canvas id="play-surface" style="background-color: lightgray; width: 75%; height: 75%;"></canvas> -->
-        <canvas id="play-surface"></canvas>
+        <div class="board">
+            <canvas id="play-surface"></canvas>
+        </div>
+        <div class="game-info">
+            <span class="title">Tetris</span>
+            <!-- <div class="stats">
+                <div class="score">
+                    <span class="label">Score:</span>
+                    <span class="value"></span>
+                </div>
+                <div class="time">
+                    <span class="label">Time:</span>
+                    <span class="value"></span>
+                </div>
+            </div>
+            <div class="next-piece">
+                <canvas id="preview"></canvas>
+            </div> -->
+            <button class="start" id="start-button">Start Game</button>
+        </div>
 
 
         <script type="module" src="../draw.js"></script>
